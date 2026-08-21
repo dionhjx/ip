@@ -17,20 +17,30 @@ Hi, I'm ChudGPT. How can I help you?
 ____________________________________________________________
 ```
 
-## Echoing commands
+## Adding tasks
 
-Enter any non-empty command. ChudGPT prints the command back to the user.
+Enter any non-empty command. ChudGPT will add the task to your list. Note that the list only supports 100 tasks.
 
 Example:
 
 ```text
-list
+read book
 ____________________________________________________________
-list
+added: read book
 ____________________________________________________________
 ```
-
 Blank lines are ignored.
+
+## Viewing tasks
+
+Enter `list` to view all your tasks. The command is case-insensitive and may have surrounding spaces.
+```text
+list
+____________________________________________________________
+1. read book
+2. buy drink
+____________________________________________________________
+```
 
 ## Exiting ChudGPT
 
