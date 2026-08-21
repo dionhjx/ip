@@ -1,30 +1,44 @@
 # ChudGPT User Guide
 
-// Update the title above to match the actual pro`du`ct name
+ChudGPT is a command-line chatbot that echoes non-empty commands and exits when the user enters `bye`.
 
-// Product screenshot goes here
+## Starting ChudGPT
 
-// Product intro goes here
+Run `ChudGPT.main()` from `src/main/java/ChudGPT.java`. ChudGPT displays its banner and asks what it can do for the user.
 
-## Adding deadlines
+## Saying Hi
 
-// Describe the action and its outcome.
+Enter `hi` to say hi to ChudGPT!
 
-// Give examples of usage
-
-Example: `keyword (optional arguments)`
-
-// A description of the expected outcome goes here
-
-```
-expected output
+```text
+hi
+____________________________________________________________
+Hi, I'm ChudGPT. How can I help you?
+____________________________________________________________
 ```
 
-## Feature ABC
+## Echoing commands
 
-// Feature details
+Enter any non-empty command. ChudGPT prints the command back to the user.
 
+Example:
 
-## Feature XYZ
+```text
+list
+____________________________________________________________
+list
+____________________________________________________________
+```
 
-// Feature details
+Blank lines are ignored.
+
+## Exiting ChudGPT
+
+Enter `bye` to exit. The command is case-insensitive and may have surrounding spaces.
+
+```text
+bye
+____________________________________________________________
+Bye. Hope to see you again soon!
+____________________________________________________________
+```
