@@ -1,6 +1,6 @@
-# Duke User Guide
+# ChudGPT User Guide
 
-// Update the title above to match the actual product name
+// Update the title above to match the actual pro`du`ct name
 
 // Product screenshot goes here
 

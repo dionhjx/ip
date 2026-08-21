@@ -9,8 +9,8 @@ Unless the user says otherwise, assume that you are assisting a student working 
 # Student profile
 
 * Prior knowledge: Basic Java and OOP concepts.
-* Level of programming experience: [to be filled]
-* IDE and level of expertise: [to be filled]
+* Level of programming experience: 1 year of Java experience, 1 year of TypeScript/JavaScript experience, 1-2 months of software app dev experience, 3+ years of python experience
+* IDE and level of expertise: know about basic features, have not explored any AI features yet
 
 # Guidance for interacting with users
 
@@ -33,3 +33,7 @@ Ensure that Java 25 is used when running the application or build tasks. On macO
 Use lightweight tags unless the user requests an annotated tag.
 When proposing or creating a commit message, include enough detail to explain the rationale for the change.
 Do not commit or push unless explicitly asked.
+
+# Additional Comments
+
+Do not modify the /ip/README.md. Instead, modify /ip/docs/README.md
