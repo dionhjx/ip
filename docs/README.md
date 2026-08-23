@@ -1,6 +1,6 @@
 # ChudGPT User Guide
 
-ChudGPT is a command-line chatbot that echoes non-empty commands and exits when the user enters `bye`.
+ChudGPT is a command-line chatbot that stores tasks in memory, lets you mark them as done, and exits when the user enters `bye`.
 
 ## Starting ChudGPT
 
@@ -39,6 +39,28 @@ list
 ____________________________________________________________
 1. read book
 2. buy drink
+____________________________________________________________
+```
+
+## Marking tasks as done
+
+Enter `mark <task number>` to mark a task as done. Task numbers start at 1.
+
+```text
+mark 2
+____________________________________________________________
+Nice! I've marked this task as done:
+  [X] return book
+____________________________________________________________
+```
+
+Enter `unmark <task number>` to mark a completed task as not done.
+
+```text
+unmark 2
+____________________________________________________________
+OK, I've marked this task as not done yet:
+  [ ] return book
 ____________________________________________________________
 ```
 

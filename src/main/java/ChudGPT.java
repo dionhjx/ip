@@ -7,30 +7,50 @@ import java.util.Scanner;
  * The entry point for the ChudGPT chatbot application.
  */
 public class ChudGPT {
-    private static int taskCount     = 0;
-    private static final String[] tasks = new String[100];
+    private static int taskCount = 0;
+    private static final Task[] tasks = new Task[100];
 
     private static String listOut() {
-        StringBuilder message = new StringBuilder();
+        StringBuilder message = new StringBuilder("Here are the tasks in your list:");
         for (int i = 0; i < taskCount; i++) {
-            if (i > 0) {
-                message.append("\n");
-            }
-            message.append(i + 1).append(". ").append(tasks[i]);
+            message.append("\n").append(i + 1).append(". ").append(tasks[i]);
         }
 
         return message.toString();
     }
 
-    private static void addTask(String task) {
-        if (task.isBlank()) return;
-
+    private static boolean addTask(String task) {
         if (taskCount == tasks.length) {
-            System.out.println("Too much tasks to store.");
-            return;
+            return false;
         }
-        tasks[taskCount] = task;
+        tasks[taskCount] = new Task(task);
         ++taskCount;
+        return true;
+    }
+
+    private static String changeTaskStatus(String command, boolean completed) {
+        String[] parts = command.split("\\s+");
+        if (parts.length != 2) {
+            return "Usage: " + (completed ? "mark" : "unmark") + " <task number>";
+        }
+
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(parts[1]);
+        } catch (NumberFormatException e) {
+            return "Task number must be a number.";
+        }
+
+        int index = taskNumber - 1;
+        if (index < 0 || index >= taskCount) {
+            return "Invalid task number.";
+        }
+
+        tasks[index].setCompleted(completed);
+        String prefix = completed
+                ? "Nice! I've marked this task as done:"
+                : "OK, I've marked this task as not done yet:";
+        return prefix + "\n  " + tasks[index];
     }
 
     public static void main(String[] args) throws IOException {
@@ -56,16 +76,23 @@ public class ChudGPT {
                 continue;
             }
 
-            String command = message.trim();
+            String command = message.trim().toLowerCase();
             if (command.equalsIgnoreCase("bye")) {
                 break;
             } else if (command.equalsIgnoreCase("hi")) {
                 message = "Hi, I'm ChudGPT. How can I help you?";
             } else if (command.equalsIgnoreCase("list")) {
                 message = listOut();
+            } else if (command.equals("mark") || command.startsWith("mark ")) {
+                message = changeTaskStatus(command, true);
+            } else if (command.equals("unmark") || command.startsWith("unmark ")) {
+                message = changeTaskStatus(command, false);
             } else {
-                addTask(message);
-                message = "added: " + command;
+                if (addTask(message)) {
+                    message = "added: " + command;
+                } else {
+                    message = "I can't store more than 100 tasks.";
+                }
             }
 
 
@@ -76,5 +103,23 @@ public class ChudGPT {
 
         System.out.println("Bye. Hope to see you again soon!");
         System.out.println("____________________________________________________________");
+    }
+
+    private static class Task {
+        private boolean completed;
+        private final String task;
+        public Task(String task) {
+            this.task = task;
+            completed = false;
+        }
+
+        public void setCompleted(boolean completed) {
+            this.completed = completed;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("[%s] %s", completed ? "X" : " ", task);
+        }
     }
 }
