@@ -17,6 +17,20 @@ Hi, I'm ChudGPT. How can I help you?
 ____________________________________________________________
 ```
 
+## Development workflow
+
+After changing the application code:
+
+1. Review and update [`test/ui-test-plan.md`](../test/ui-test-plan.md) if the intended console inputs or outputs changed.
+2. Invoke the project-specific `test-ui` skill to run the UI tests. It uses Java 25, prints the console input/output transcript, and stops at the first failure.
+3. Update this guide with any user-visible behavior or usage changes.
+
+From the project root, the underlying test runner can be started with:
+
+```text
+python .codex/skills/test-ui/scripts/run_ui_tests.py
+```
+
 ## Adding tasks
 
 Enter any non-empty command. ChudGPT will add the task to your list. Note that the list only supports 100 tasks.
