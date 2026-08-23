@@ -21,64 +21,79 @@ public class ChudGPT {
     }
 
     /**
-     * Adds a task described by a user command.
+     * Processes a command entered by the user.
      *
-     * <p>The date and time portions are deliberately kept as strings because
-     * this level of the project does not require date parsing.</p>
+     * <p>The command may add a task, list tasks, or change a task's completion
+     * status. The date and time portions of task commands are deliberately kept
+     * as strings because this level of the project does not require date
+     * parsing.</p>
      *
-     * @param command the complete task command entered by the user
+     * @param command the complete command entered by the user
      * @return the response to display after processing the command
      */
-    private static String addTask(String command) {
-        if (taskCount == tasks.length) {
-            return "I can't store more than 100 tasks.";
-        }
-
+    private static String handleCommand(String command) {
         String taskCommand = command.trim();
         String lowerCaseCommand = taskCommand.toLowerCase(Locale.ROOT);
-        Task task;
 
-        if (lowerCaseCommand.equals("todo") || lowerCaseCommand.startsWith("todo ")) {
-            String description = taskCommand.substring(4).trim();
-            if (description.isEmpty()) {
-                throw new IllegalArgumentException("OOPS!!! The description of a todo cannot be empty.");
-            }
-            task = new ToDo(description);
-        } else if (lowerCaseCommand.equals("deadline")
-                || lowerCaseCommand.startsWith("deadline ")) {
-            int byIndex = lowerCaseCommand.indexOf("/by");
-            if (byIndex < 0) {
-                    throw new IllegalArgumentException("OOPS!!! There must be a /by argument passed in.");
-            }
-
-            String description = taskCommand.substring(8, byIndex).trim();
-            String submitBy = taskCommand.substring(byIndex + 3).trim();
-            if (description.isEmpty() || submitBy.isEmpty()) {
-                throw new IllegalArgumentException("OOPS!!! The description of a deadline cannot be empty");
-            }
-            task = new Deadline(description, submitBy);
-        } else if (lowerCaseCommand.equals("event") || lowerCaseCommand.startsWith("event ")) {
-            int fromIndex = lowerCaseCommand.indexOf("/from");
-            int toIndex = lowerCaseCommand.indexOf("/to", fromIndex + 5);
-            if (fromIndex < 0 || toIndex < 0 || toIndex <= fromIndex) {
-                throw new IllegalArgumentException("OOPS!!! Specify the /from argument before the /to argument");
-            }
-
-            String description = taskCommand.substring(5, fromIndex).trim();
-            String start = taskCommand.substring(fromIndex + 5, toIndex).trim();
-            String end = taskCommand.substring(toIndex + 3).trim();
-            if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                throw new IllegalArgumentException("OOPS!!! The description, start and end date of an event cannot be empty");
-            }
-            task = new Event(description, start, end);
-        } else {
-            throw new IllegalArgumentException("OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...");
+        if (lowerCaseCommand.equals("list")) {
+            return listOut();
+        } else if (lowerCaseCommand.equals("mark") || lowerCaseCommand.startsWith("mark ")) {
+            return changeTaskStatus(taskCommand, true);
+        } else if (lowerCaseCommand.equals("unmark") || lowerCaseCommand.startsWith("unmark ")) {
+            return changeTaskStatus(taskCommand, false);
         }
 
-        tasks[taskCount] = task;
-        ++taskCount;
-        return "Got it. I've added this task:\n  " + task
-                + "\nNow you have " + taskCount + " tasks in the list.";
+        try {
+            if (taskCount == tasks.length) {
+                return "I can't store more than 100 tasks.";
+            }
+
+            Task task;
+
+            if (lowerCaseCommand.equals("todo") || lowerCaseCommand.startsWith("todo ")) {
+                String description = taskCommand.substring(4).trim();
+                if (description.isEmpty()) {
+                    throw new IllegalArgumentException("OOPS!!! The description of a todo cannot be empty.");
+                }
+                task = new ToDo(description);
+            } else if (lowerCaseCommand.equals("deadline")
+                    || lowerCaseCommand.startsWith("deadline ")) {
+                int byIndex = lowerCaseCommand.indexOf("/by");
+                if (byIndex < 0) {
+                        throw new IllegalArgumentException("OOPS!!! There must be a /by argument passed in.");
+                }
+
+                String description = taskCommand.substring(8, byIndex).trim();
+                String submitBy = taskCommand.substring(byIndex + 3).trim();
+                if (description.isEmpty() || submitBy.isEmpty()) {
+                    throw new IllegalArgumentException("OOPS!!! The description of a deadline cannot be empty");
+                }
+                task = new Deadline(description, submitBy);
+            } else if (lowerCaseCommand.equals("event") || lowerCaseCommand.startsWith("event ")) {
+                int fromIndex = lowerCaseCommand.indexOf("/from");
+                int toIndex = lowerCaseCommand.indexOf("/to", fromIndex + 5);
+                if (fromIndex < 0 || toIndex < 0 || toIndex <= fromIndex) {
+                    throw new IllegalArgumentException("OOPS!!! Specify the /from argument before the /to argument");
+                }
+
+                String description = taskCommand.substring(5, fromIndex).trim();
+                String start = taskCommand.substring(fromIndex + 5, toIndex).trim();
+                String end = taskCommand.substring(toIndex + 3).trim();
+                if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
+                    throw new IllegalArgumentException("OOPS!!! The description, start and end date of an event cannot be empty");
+                }
+                task = new Event(description, start, end);
+            } else {
+                throw new IllegalArgumentException("OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...");
+            }
+
+            tasks[taskCount] = task;
+            ++taskCount;
+            return "Got it. I've added this task:\n  " + task
+                    + "\nNow you have " + taskCount + " tasks in the list.";
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
+        }
     }
 
     private static String changeTaskStatus(String command, boolean completed) {
@@ -134,18 +149,8 @@ public class ChudGPT {
                 break;
             } else if (command.startsWith("hi")) {
                 message = "Hi, I'm ChudGPT. How can I help you?";
-            } else if (command.equalsIgnoreCase("list")) {
-                message = listOut();
-            } else if (command.equals("mark") || command.startsWith("mark ")) {
-                message = changeTaskStatus(command, true);
-            } else if (command.equals("unmark") || command.startsWith("unmark ")) {
-                message = changeTaskStatus(command, false);
             } else {
-                try {
-                    message = addTask(message);
-                } catch (IllegalArgumentException e) {
-                    message = e.getMessage();
-                }
+                message = handleCommand(message);
             }
 
 

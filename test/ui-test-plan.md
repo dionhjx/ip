@@ -162,7 +162,7 @@ ____________________________________________________________
 
 ## Test Case 5: Handle empty and unsupported task commands
 
-Aim: Verify that an empty `todo` command reports its usage, while the original free-form task syntax is rejected as an unknown command without adding a task.
+Aim: Verify that an empty `todo` command and an unsupported task command return validation messages without adding a task.
 
 Inputs:
 
@@ -187,10 +187,10 @@ Hello! I'm ChudGPT.
 What can I do for you?
 ____________________________________________________________
 ____________________________________________________________
-Usage: todo <description>
+OOPS!!! The description of a todo cannot be empty.
 ____________________________________________________________
 ____________________________________________________________
-Unknown command.
+OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...
 ____________________________________________________________
 ____________________________________________________________
 Here are the tasks in your list:
