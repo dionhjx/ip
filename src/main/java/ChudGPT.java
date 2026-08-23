@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -9,12 +10,12 @@ import java.util.Scanner;
  */
 public class ChudGPT {
     private static int taskCount = 0;
-    private static final Task[] tasks = new Task[100];
+    private static final ArrayList<Task> tasks = new ArrayList<>();
 
     private static String listOut() {
         StringBuilder message = new StringBuilder("Here are the tasks in your list:");
         for (int i = 0; i < taskCount; i++) {
-            message.append("\n").append(i + 1).append(". ").append(tasks[i]);
+            message.append("\n").append(i + 1).append(". ").append(tasks.get(i));
         }
 
         return message.toString();
@@ -41,13 +42,11 @@ public class ChudGPT {
             return changeTaskStatus(taskCommand, true);
         } else if (lowerCaseCommand.equals("unmark") || lowerCaseCommand.startsWith("unmark ")) {
             return changeTaskStatus(taskCommand, false);
+        } else if (lowerCaseCommand.equals("delete") || lowerCaseCommand.startsWith("delete ")) {
+            return deleteTask(taskCommand);
         }
 
         try {
-            if (taskCount == tasks.length) {
-                return "I can't store more than 100 tasks.";
-            }
-
             Task task;
 
             if (lowerCaseCommand.equals("todo") || lowerCaseCommand.startsWith("todo ")) {
@@ -84,10 +83,10 @@ public class ChudGPT {
                 }
                 task = new Event(description, start, end);
             } else {
-                throw new IllegalArgumentException("OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...");
+                throw new IllegalArgumentException("OOPS!!! I'm sorry, but I don't know what that means :( I'm such a chud...");
             }
 
-            tasks[taskCount] = task;
+            tasks.add(task);
             ++taskCount;
             return "Got it. I've added this task:\n  " + task
                     + "\nNow you have " + taskCount + " tasks in the list.";
@@ -114,11 +113,36 @@ public class ChudGPT {
             return "Invalid task number.";
         }
 
-        tasks[index].setCompleted(completed);
+        tasks.get(index).setCompleted(completed);
         String prefix = completed
                 ? "Nice! I've marked this task as done:"
                 : "OK, I've marked this task as not done yet:";
-        return prefix + "\n  " + tasks[index];
+        return prefix + "\n  " + tasks.get(index);
+    }
+
+    private static String deleteTask(String command) {
+        String[] parts = command.split("\\s+");
+        if (parts.length != 2) {
+            return "Usage: delete <task number>";
+        }
+        int taskNumber;
+        try {
+            taskNumber = Integer.parseInt(parts[1]);
+        } catch (NumberFormatException e) {
+            return "Task number must be a number.";
+        }
+
+        int index = taskNumber - 1;
+        if (index < 0 || index >= taskCount) {
+            return "Invalid task number.";
+        }
+
+        String message = String.format("Noted. I've removed this task:\n  %s\nNow you have %d tasks in the list",
+                tasks.get(index), taskCount - 1);
+        tasks.remove(index);
+        --taskCount;
+
+        return message;
     }
 
     static void main(String[] args) throws IOException {
