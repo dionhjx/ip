@@ -41,14 +41,14 @@ Bye. Hope to see you again soon!
 ____________________________________________________________
 ```
 
-## Test Case 2: Add, list, and complete a task
+## Test Case 2: Add, list, and complete a ToDo
 
-Aim: Verify that a task is added, shown by `list`, and marked complete with `mark 1`.
+Aim: Verify that a ToDo is added, shown by `list`, and marked complete with `mark 1`.
 
 Inputs:
 
 ```text
-read book
+todo read book
 list
 mark 1
 bye
@@ -68,21 +68,68 @@ Hello! I'm ChudGPT.
 What can I do for you?
 ____________________________________________________________
 ____________________________________________________________
-added: read book
+Got it. I've added this task:
+  [T][ ] read book
+Now you have 1 tasks in the list.
 ____________________________________________________________
 ____________________________________________________________
 Here are the tasks in your list:
-1. [ ] read book
+1. [T][ ] read book
 ____________________________________________________________
 ____________________________________________________________
 Nice! I've marked this task as done:
-  [X] read book
+  [T][X] read book
 ____________________________________________________________
 Bye. Hope to see you again soon!
 ____________________________________________________________
 ```
 
-## Test Case 3: Reject an invalid task number
+## Test Case 3: Add deadlines and events
+
+Aim: Verify that deadline and event descriptions keep their date/time values as entered and display the correct task types.
+
+Inputs:
+
+```text
+deadline return book /by Sunday
+event project meeting /from Mon 2pm /to 4pm
+list
+bye
+```
+
+Expected output:
+
+```text
+____________________________________________________________
+  ____ _               _  ____ ____ _____ 
+ / ___| |__  _   _  __| |/ ___|  _ \_   _|
+| |   | '_ \| | | |/ _` | |  _| |_) || |  
+| |___| | | | |_| | (_| | |_| |  __/ | |  
+ \____|_| |_|\__,_|\__,_|\____|_|    |_|  
+
+Hello! I'm ChudGPT.
+What can I do for you?
+____________________________________________________________
+____________________________________________________________
+Got it. I've added this task:
+  [D][ ] return book (by: Sunday)
+Now you have 1 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+Got it. I've added this task:
+  [E][ ] project meeting (from: Mon 2pm to: 4pm)
+Now you have 2 tasks in the list.
+____________________________________________________________
+____________________________________________________________
+Here are the tasks in your list:
+1. [D][ ] return book (by: Sunday)
+2. [E][ ] project meeting (from: Mon 2pm to: 4pm)
+____________________________________________________________
+Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+## Test Case 4: Reject an invalid task number
 
 Aim: Verify that marking a task number that does not exist reports an error without changing the task list.
 

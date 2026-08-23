@@ -1,6 +1,6 @@
 # ChudGPT User Guide
 
-ChudGPT is a command-line chatbot that stores tasks in memory, lets you mark them as done, and exits when the user enters `bye`.
+ChudGPT is a command-line chatbot that stores tasks in memory, supports ToDos, deadlines, and events, lets you mark them as done, and exits when the user enters `bye`.
 
 ## Starting ChudGPT
 
@@ -33,17 +33,50 @@ python .codex/skills/test-ui/scripts/run_ui_tests.py
 
 ## Adding tasks
 
-Enter any non-empty command. ChudGPT will add the task to your list. Note that the list only supports 100 tasks.
+Use one of the following commands. Date and time values are stored as text exactly as entered. The list supports up to 100 tasks.
 
-Example:
+### ToDos
+
+Enter `todo <description>` for a task without a date or time:
 
 ```text
-read book
+todo borrow book
 ____________________________________________________________
-added: read book
+Got it. I've added this task:
+  [T][ ] borrow book
+Now you have 1 tasks in the list.
 ____________________________________________________________
 ```
-Blank lines are ignored.
+
+For compatibility, a non-empty command without a recognized task prefix is also stored as a ToDo.
+
+### Deadlines
+
+Enter `deadline <description> /by <date/time>` for a task that must be completed by a specific date or time:
+
+```text
+deadline return book /by Sunday
+____________________________________________________________
+Got it. I've added this task:
+  [D][ ] return book (by: Sunday)
+Now you have 1 tasks in the list.
+____________________________________________________________
+```
+
+### Events
+
+Enter `event <description> /from <start> /to <end>` for a task with a start and end date/time:
+
+```text
+event project meeting /from Mon 2pm /to 4pm
+____________________________________________________________
+Got it. I've added this task:
+  [E][ ] project meeting (from: Mon 2pm to: 4pm)
+Now you have 1 tasks in the list.
+____________________________________________________________
+```
+
+The `deadline` and `event` commands require non-empty descriptions and date/time values. Blank lines are ignored.
 
 ## Viewing tasks
 
@@ -51,8 +84,9 @@ Enter `list` to view all your tasks. The command is case-insensitive and may hav
 ```text
 list
 ____________________________________________________________
-1. read book
-2. buy drink
+1. [T][ ] read book
+2. [D][ ] return book (by: Sunday)
+3. [E][ ] project meeting (from: Mon 2pm to: 4pm)
 ____________________________________________________________
 ```
 
@@ -64,7 +98,7 @@ Enter `mark <task number>` to mark a task as done. Task numbers start at 1.
 mark 2
 ____________________________________________________________
 Nice! I've marked this task as done:
-  [X] return book
+  [D][X] return book (by: Sunday)
 ____________________________________________________________
 ```
 
@@ -74,7 +108,7 @@ Enter `unmark <task number>` to mark a completed task as not done.
 unmark 2
 ____________________________________________________________
 OK, I've marked this task as not done yet:
-  [ ] return book
+  [D][ ] return book (by: Sunday)
 ____________________________________________________________
 ```
 
