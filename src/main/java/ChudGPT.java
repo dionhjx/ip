@@ -43,7 +43,7 @@ public class ChudGPT {
             if (description.isEmpty()) {
                 return "Usage: todo <description>";
             }
-            task = new ToDo(description);   
+            task = new ToDo(description);
         } else if (lowerCaseCommand.equals("deadline")
                 || lowerCaseCommand.startsWith("deadline ")) {
             int byIndex = lowerCaseCommand.indexOf("/by");
