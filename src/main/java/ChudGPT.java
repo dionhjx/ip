@@ -41,39 +41,38 @@ public class ChudGPT {
         if (lowerCaseCommand.equals("todo") || lowerCaseCommand.startsWith("todo ")) {
             String description = taskCommand.substring(4).trim();
             if (description.isEmpty()) {
-                return "Usage: todo <description>";
+                throw new IllegalArgumentException("OOPS!!! The description of a todo cannot be empty.");
             }
             task = new ToDo(description);
         } else if (lowerCaseCommand.equals("deadline")
                 || lowerCaseCommand.startsWith("deadline ")) {
             int byIndex = lowerCaseCommand.indexOf("/by");
             if (byIndex < 0) {
-                return "Usage: deadline <description> /by <date/time>";
+                    throw new IllegalArgumentException("OOPS!!! There must be a /by argument passed in.");
             }
 
             String description = taskCommand.substring(8, byIndex).trim();
             String submitBy = taskCommand.substring(byIndex + 3).trim();
             if (description.isEmpty() || submitBy.isEmpty()) {
-                return "Usage: deadline <description> /by <date/time>";
+                throw new IllegalArgumentException("OOPS!!! The description of a deadline cannot be empty");
             }
             task = new Deadline(description, submitBy);
         } else if (lowerCaseCommand.equals("event") || lowerCaseCommand.startsWith("event ")) {
             int fromIndex = lowerCaseCommand.indexOf("/from");
             int toIndex = lowerCaseCommand.indexOf("/to", fromIndex + 5);
             if (fromIndex < 0 || toIndex < 0 || toIndex <= fromIndex) {
-                return "Usage: event <description> /from <start> /to <end>";
+                throw new IllegalArgumentException("OOPS!!! Specify the /from argument before the /to argument");
             }
 
             String description = taskCommand.substring(5, fromIndex).trim();
             String start = taskCommand.substring(fromIndex + 5, toIndex).trim();
             String end = taskCommand.substring(toIndex + 3).trim();
             if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                return "Usage: event <description> /from <start> /to <end>";
+                throw new IllegalArgumentException("OOPS!!! The description, start and end date of an event cannot be empty");
             }
             task = new Event(description, start, end);
         } else {
-            // Keep accepting the original free-form task syntax as a ToDo.
-            task = new ToDo(taskCommand);
+            throw new IllegalArgumentException("OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...");
         }
 
         tasks[taskCount] = task;
@@ -107,7 +106,7 @@ public class ChudGPT {
         return prefix + "\n  " + tasks[index];
     }
 
-    public static void main(String[] args) throws IOException {
+    static void main(String[] args) throws IOException {
         Scanner input = new Scanner(System.in);
 
         String logo;
@@ -133,7 +132,7 @@ public class ChudGPT {
             String command = message.trim().toLowerCase(Locale.ROOT);
             if (command.equalsIgnoreCase("bye")) {
                 break;
-            } else if (command.equalsIgnoreCase("hi")) {
+            } else if (command.startsWith("hi")) {
                 message = "Hi, I'm ChudGPT. How can I help you?";
             } else if (command.equalsIgnoreCase("list")) {
                 message = listOut();
@@ -142,7 +141,11 @@ public class ChudGPT {
             } else if (command.equals("unmark") || command.startsWith("unmark ")) {
                 message = changeTaskStatus(command, false);
             } else {
-                message = addTask(message);
+                try {
+                    message = addTask(message);
+                } catch (IllegalArgumentException e) {
+                    message = e.getMessage();
+                }
             }
 
 
@@ -155,10 +158,8 @@ public class ChudGPT {
         System.out.println("____________________________________________________________");
     }
 
-    /** A task with a description and completion state. */
     private static class Task {
         private boolean completed;
-        /** The user-provided task description. */
         private final String task;
 
         public Task(String task) {
@@ -176,7 +177,6 @@ public class ChudGPT {
         }
     }
 
-    /** A task without an attached date or time. */
     private static class ToDo extends Task {
         public ToDo(String task) {
             super(task);
@@ -188,9 +188,7 @@ public class ChudGPT {
         }
     }
 
-    /** A task that must be completed by a user-provided date or time. */
     private static class Deadline extends Task {
-        /** The raw date or time by which the task should be completed. */
         private final String submitBy;
 
         public Deadline(String task, String submitBy) {
@@ -204,11 +202,8 @@ public class ChudGPT {
         }
     }
 
-    /** A task with user-provided start and end date/time strings. */
     private static class Event extends Task {
-        /** The raw start date or time for the event. */
         private final String start;
-        /** The raw end date or time for the event. */
         private final String end;
 
         public Event(String task, String start, String end) {

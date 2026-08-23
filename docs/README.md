@@ -48,7 +48,7 @@ Now you have 1 tasks in the list.
 ____________________________________________________________
 ```
 
-For compatibility, a non-empty command without a recognized task prefix is also stored as a ToDo.
+Commands without a recognized task prefix are rejected with `Unknown command.` and are not added to the task list. A `todo` command without a description reports its usage and is not added.
 
 ### Deadlines
 
@@ -76,7 +76,7 @@ Now you have 1 tasks in the list.
 ____________________________________________________________
 ```
 
-The `deadline` and `event` commands require non-empty descriptions and date/time values. Blank lines are ignored.
+The `deadline` and `event` commands require non-empty descriptions and date/time values. Invalid task commands are handled without stopping the application, and blank lines are ignored.
 
 ## Viewing tasks
 

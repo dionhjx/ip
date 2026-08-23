@@ -34,7 +34,7 @@ After every code update:
 
 1. Review the change against `test/ui-test-plan.md` and update the plan when the intended console behavior, inputs, or outputs changed.
 2. Invoke the project-specific `$test-ui` skill to run the UI test plan. The skill must print the console input/output transcript and stop at the first failure.
-3. Update `docs/README.md` with any user-visible behavior or usage changes. Do not modify `/ip/README.md`.
+3. Update `docs/README.md` with any user-visible behavior or usage changes.
 
 ## Git
 
@@ -43,5 +43,3 @@ When proposing or creating a commit message, include enough detail to explain th
 Do not commit or push unless explicitly asked.
 
 # Additional Comments
-
-Do not modify the /ip/README.md. Instead, modify /ip/docs/README.md
