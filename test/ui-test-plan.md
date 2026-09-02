@@ -2,11 +2,12 @@
 
 ## Application
 
-- Main class: `ChudGPT`
+- Main class: `chudgpt.ChudGPT`
 - Source root: `src/main/java`
 - Resource root: `src/main/resources`
 - Java requirement: Java 25
 - Comparison: exact stdout after normalizing line endings; the final newline is significant
+- Each test case runs in an isolated temporary working directory so saved tasks from one case do not affect another.
 
 Each test case starts a fresh process. The `Inputs` block contains one console command per line. The `Expected output` block is the complete stdout from that session.
 
@@ -194,6 +195,48 @@ OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...
 ____________________________________________________________
 ____________________________________________________________
 Here are the tasks in your list:
+____________________________________________________________
+Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+## Test Case 6: Load saved tasks at startup
+
+Aim: Verify that tasks are loaded from the relative save file when the chatbot starts.
+
+Initial save file:
+
+```text
+T | 1 | read book
+D | 0 | return book | June 6th
+E | 0 | project meeting | Aug 6th 2-4pm | Aug 6th 3-4pm
+```
+
+Inputs:
+
+```text
+list
+bye
+```
+
+Expected output:
+
+```text
+____________________________________________________________
+  ____ _               _  ____ ____ _____ 
+ / ___| |__  _   _  __| |/ ___|  _ \_   _|
+| |   | '_ \| | | |/ _` | |  _| |_) || |  
+| |___| | | | |_| | (_| | |_| |  __/ | |  
+ \____|_| |_|\__,_|\__,_|\____|_|    |_|  
+
+Hello! I'm ChudGPT.
+What can I do for you?
+____________________________________________________________
+____________________________________________________________
+Here are the tasks in your list:
+1. [T][X] read book
+2. [D][ ] return book (by: June 6th)
+3. [E][ ] project meeting (from: Aug 6th 2-4pm to: Aug 6th 3-4pm)
 ____________________________________________________________
 Bye. Hope to see you again soon!
 ____________________________________________________________

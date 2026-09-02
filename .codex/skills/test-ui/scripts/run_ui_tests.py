@@ -15,7 +15,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 PLAN_PATH = REPOSITORY_ROOT / "test" / "ui-test-plan.md"
 SOURCE_ROOT = REPOSITORY_ROOT / "src" / "main" / "java"
 RESOURCE_ROOT = REPOSITORY_ROOT / "src" / "main" / "resources"
-MAIN_CLASS = "ChudGPT"
+MAIN_CLASS = "chudgpt.ChudGPT"
 
 
 @dataclass(frozen=True)
@@ -24,6 +24,7 @@ class TestCase:
     aim: str
     inputs: str
     expected: str
+    initial_save: str | None = None
 
 
 def normalize(value: str) -> str:
@@ -58,7 +59,13 @@ def parse_plan(text: str) -> list[TestCase]:
             raise ValueError(f"Test case '{heading.group(1)}' is missing Aim")
         inputs, inputs_end = read_block(section, "Inputs", 0)
         expected, _ = read_block(section, "Expected output", inputs_end)
-        cases.append(TestCase(heading.group(1), aim_match.group(1), inputs, expected))
+        initial_save_match = re.search(
+            r"^Initial save file:\s*\n\s*```(?:text)?\s*\n(.*?)^```\s*$",
+            section,
+            re.MULTILINE | re.DOTALL,
+        )
+        initial_save = normalize(initial_save_match.group(1)) if initial_save_match else None
+        cases.append(TestCase(heading.group(1), aim_match.group(1), inputs, expected, initial_save))
     return cases
 
 
@@ -80,7 +87,7 @@ def check_java_25() -> None:
 
 def compile_application(classes: Path) -> None:
     """Compile the application and copy classpath resources into a temporary tree."""
-    sources = sorted(SOURCE_ROOT.glob("*.java"))
+    sources = sorted(SOURCE_ROOT.rglob("*.java"))
     if not sources:
         raise RuntimeError(f"No Java sources found in {SOURCE_ROOT}")
     subprocess.run(
@@ -96,12 +103,12 @@ def compile_application(classes: Path) -> None:
                 shutil.copy2(resource, destination)
 
 
-def run_case(case: TestCase, classes: Path) -> tuple[str, str]:
+def run_case(case: TestCase, classes: Path, working_directory: Path) -> tuple[str, str]:
     """Run one isolated test case and return normalized actual stdout and input."""
     input_text = case.inputs
     result = subprocess.run(
         ["java", "-cp", str(classes), MAIN_CLASS],
-        cwd=REPOSITORY_ROOT,
+        cwd=working_directory,
         input=input_text,
         capture_output=True,
         text=True,
@@ -129,7 +136,16 @@ def main() -> int:
             classes.mkdir()
             compile_application(classes)
             for number, case in enumerate(cases, start=1):
-                input_text, actual = run_case(case, classes)
+                working_directory = Path(directory) / f"case-{number}"
+                working_directory.mkdir()
+                if case.initial_save is not None:
+                    data_directory = working_directory / "data"
+                    data_directory.mkdir()
+                    (data_directory / "save.txt").write_text(
+                        case.initial_save,
+                        encoding="utf-8",
+                    )
+                input_text, actual = run_case(case, classes, working_directory)
                 print(f"\n=== Test Case {number}: {case.name} ===")
                 print(f"Aim: {case.aim}")
                 print_transcript(case, input_text, actual)
