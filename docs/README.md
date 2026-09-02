@@ -1,10 +1,12 @@
 # ChudGPT User Guide
 
-ChudGPT is a command-line chatbot that stores tasks in memory, supports ToDos, deadlines, and events, lets you mark them as done, and exits when the user enters `bye`.
+ChudGPT is a command-line chatbot that supports ToDos, deadlines, and events, lets you mark them as done, and exits when the user enters `bye`. The task list is saved automatically in the relative file `data/save.txt`.
 
 ## Starting ChudGPT
 
-Run `ChudGPT.main()` from `src/main/java/ChudGPT.java`. ChudGPT displays its banner and asks what it can do for the user.
+Run `chudgpt.ChudGPT.main()` from `src/main/java/chudgpt/ChudGPT.java`. ChudGPT displays its banner and asks what it can do for the user.
+
+When it starts, ChudGPT loads tasks from `data/save.txt`. On the first run, the file and its `data` folder may not exist; ChudGPT starts with an empty task list. The folder and file are created automatically when the first task-list change is saved.
 
 ## Saying Hi
 
@@ -111,6 +113,10 @@ OK, I've marked this task as not done yet:
   [D][ ] return book (by: Sunday)
 ____________________________________________________________
 ```
+
+## Saving tasks
+
+Tasks are saved automatically after adding a task, marking or unmarking a task, or deleting a task. The save file uses a readable text format containing the task type, completion status, description, and any deadline or event details.
 
 ## Exiting ChudGPT
 
