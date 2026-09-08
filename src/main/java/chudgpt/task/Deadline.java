@@ -1,17 +1,19 @@
 package chudgpt.task;
 
+import java.time.LocalDate;
+
 /** A task that must be completed by a specified time. */
 public class Deadline extends Task {
-    protected final String submitBy;
+    protected final LocalDate by;
 
-    public Deadline(String task, String submitBy) {
+    public Deadline(String task, LocalDate submitBy) {
         super(task);
-        this.submitBy = submitBy;
+        this.by = submitBy;
     }
 
     @Override
     public String toString() {
-        return String.format("[D]%s (by: %s)", super.toString(), submitBy);
+        return String.format("[D]%s (by: %s)", super.toString(), by);
     }
 
     /**
@@ -21,6 +23,6 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, task, submitBy);
+        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, task, by);
     }
 }
