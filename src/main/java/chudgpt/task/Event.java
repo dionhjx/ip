@@ -1,11 +1,13 @@
 package chudgpt.task;
 
+import java.time.LocalDate;
+
 /** A task that takes place during a specified time range. */
 public class Event extends Task {
-    protected final String start;
-    protected final String end;
+    protected final LocalDate start;
+    protected final LocalDate end;
 
-    public Event(String task, String start, String end) {
+    public Event(String task, LocalDate start, LocalDate end) {
         super(task);
         this.start = start;
         this.end = end;

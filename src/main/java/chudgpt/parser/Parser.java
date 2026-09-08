@@ -6,6 +6,8 @@ import chudgpt.task.Event;
 import chudgpt.task.Task;
 import chudgpt.task.ToDo;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.Locale;
 
 /** Parses task commands and task-number arguments entered by the user. */
@@ -40,7 +42,7 @@ public class Parser {
             if (description.isEmpty() || submitBy.isEmpty()) {
                 throw new ChudException("OOPS!!! The description of a deadline cannot be empty");
             }
-            return new Deadline(description, submitBy);
+            return new Deadline(description, parseDate(submitBy));
         }
 
         if (lowerCaseCommand.equals("event") || lowerCaseCommand.startsWith("event ")) {
@@ -58,11 +60,10 @@ public class Parser {
                         OOPS!!! The description, start and end date of an event cannot be empty
                         """);
             }
-            return new Event(description, start, end);
+            return new Event(description, parseDate(start), parseDate(end));
         }
 
-        throw new ChudException(
-                "OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...");
+        throw new ChudException("OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...");
     }
 
     /**
@@ -83,6 +84,14 @@ public class Parser {
             return Integer.parseInt(parts[1]) - 1;
         } catch (NumberFormatException e) {
             throw new ChudException("Task number must be a number.");
+        }
+    }
+
+    public static LocalDate parseDate(String value) throws ChudException {
+        try {
+            return LocalDate.parse(value);
+        } catch (DateTimeParseException e) {
+            throw new ChudException("OOPS!!! Input a date in the format yyyy-mm-dd");
         }
     }
 }

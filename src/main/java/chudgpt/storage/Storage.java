@@ -1,5 +1,7 @@
 package chudgpt.storage;
 
+import chudgpt.exception.ChudException;
+import chudgpt.parser.Parser;
 import chudgpt.task.Deadline;
 import chudgpt.task.Event;
 import chudgpt.task.Task;
@@ -58,7 +60,7 @@ public class Storage {
                     tasks.addTask(task);
                 }
             }
-        } catch (IOException e) {
+        } catch (IOException | ChudException e) {
             System.err.println("Error loading task list from file.");
         }
     }
@@ -69,7 +71,7 @@ public class Storage {
      * @param line the serialized task record
      * @return the parsed task, or {@code null} when the record cannot be parsed
      */
-    private Task parseSavedTask(String line) {
+    private Task parseSavedTask(String line) throws ChudException {
         String[] parts = line.split("\\s*\\|\\s*", -1);
         if (parts.length < 3) {
             return null;
@@ -89,15 +91,15 @@ public class Storage {
             task = new ToDo(parts[2]);
         } else if (parts[0].equals("D") && parts.length == 4
                 && !parts[2].isBlank() && !parts[3].isBlank()) {
-            task = new Deadline(parts[2], parts[3]);
+            task = new Deadline(parts[2], Parser.parseDate(parts[3]));
         } else if (parts[0].equals("E") && parts.length == 5
                 && !parts[2].isBlank() && !parts[3].isBlank() && !parts[4].isBlank()) {
-            task = new Event(parts[2], parts[3], parts[4]);
+            task = new Event(parts[2], Parser.parseDate(parts[3]), Parser.parseDate(parts[4]));
         } else {
             return null;
         }
-
         task.setCompleted(isCompleted);
         return task;
+
     }
 }
