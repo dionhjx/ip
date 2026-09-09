@@ -6,8 +6,14 @@ import java.time.LocalDate;
 public class Deadline extends Task {
     protected final LocalDate by;
 
-    public Deadline(String task, LocalDate submitBy) {
-        super(task);
+    /**
+     * Creates a deadline task which contains a date to submit by
+     *
+     * @param description the description of the task
+     * @param submitBy the date to submit the task by
+     */
+    public Deadline(String description, LocalDate submitBy) {
+        super(description);
         this.by = submitBy;
     }
 
@@ -23,6 +29,6 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, task, by);
+        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, description, by);
     }
 }

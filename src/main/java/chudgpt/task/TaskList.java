@@ -8,10 +8,15 @@ import java.util.List;
 public class TaskList {
     private final ArrayList<Task> tasks;
 
+    /** Creates an empty task list */
     public TaskList() {
         tasks = new ArrayList<Task>();
     }
 
+    /** Creates a task list with an existing list
+     *
+     * @param tasks a list of tasks
+     */
     public TaskList(List<Task> tasks) {
         this.tasks = (ArrayList<Task>) tasks;
     }
@@ -57,6 +62,14 @@ public class TaskList {
         return tasks.get(index);
     }
 
+    /**
+     * Updates the status of a task
+     *
+     * @param index the index of the task to be updated
+     * @param isCompleted the status to update the task to
+     * @return the updated task
+     * @throws ChudException if the index is out of range
+     */
     public Task updateTask(int index, boolean isCompleted) throws ChudException {
         if (index < 0 || index >= tasks.size()) {
             throw new ChudException("Index out of bounds.");
@@ -65,6 +78,7 @@ public class TaskList {
         return tasks.get(index).setCompleted(isCompleted);
     }
 
+    /** Returns the number of tasks in the list */
     public int size() {
         return tasks.size();
     }

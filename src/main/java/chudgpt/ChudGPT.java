@@ -14,12 +14,14 @@ public class ChudGPT {
     private final TaskList tasks;
     private final Parser parser;
     private final Ui ui;
-    /** Relative location of the task data, kept portable across operating systems. */
     private final Storage storage;
 
-
+    /**
+     * Creates a ChudGPT chatbot
+     *
+     * @param filePath the file path for the storage file
+     */
     public ChudGPT(String filePath) {
-        TaskList tasks1;
         ui = new Ui();
         storage = new Storage(filePath);
         parser = new Parser();
@@ -35,6 +37,7 @@ public class ChudGPT {
         tasks = tempTasks;
     }
 
+    /** Runs the ChudGPT chatbot */
     public void run() {
         ui.showWelcomeMessage();
 
@@ -58,9 +61,8 @@ public class ChudGPT {
      * Starts the ChudGPT command-line application.
      *
      * @param args command-line arguments, which are not used.
-     * @throws ChudException if the logo resource cannot be read.
      */
-    public static void main(String[] args) throws ChudException {
+    public static void main(String[] args) {
         new ChudGPT("data/tasks.txt").run();
     }
 }

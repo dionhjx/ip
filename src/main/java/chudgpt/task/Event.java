@@ -7,8 +7,15 @@ public class Event extends Task {
     protected final LocalDate start;
     protected final LocalDate end;
 
-    public Event(String task, LocalDate start, LocalDate end) {
-        super(task);
+    /**
+     * Creates an event object, with a specified start and end date
+     *
+     * @param description the description of the event
+     * @param start the start date of the event
+     * @param end the end date of the event
+     */
+    public Event(String description, LocalDate start, LocalDate end) {
+        super(description);
         this.start = start;
         this.end = end;
     }
@@ -25,6 +32,6 @@ public class Event extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("E | %d | %s | %s | %s", isCompleted ? 1 : 0, task, start, end);
+        return String.format("E | %d | %s | %s | %s", isCompleted ? 1 : 0, description, start, end);
     }
 }

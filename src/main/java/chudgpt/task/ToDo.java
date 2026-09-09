@@ -2,8 +2,14 @@ package chudgpt.task;
 
 /** A task without a deadline or event times. */
 public class ToDo extends Task {
-    public ToDo(String task) {
-        super(task);
+
+    /**
+     * Creates a To-Do task
+     *
+     * @param description the description of the task
+     */
+    public ToDo(String description) {
+        super(description);
     }
 
     @Override
@@ -18,6 +24,6 @@ public class ToDo extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("T | %d | %s", isCompleted ? 1 : 0, task);
+        return String.format("T | %d | %s", isCompleted ? 1 : 0, description);
     }
 }

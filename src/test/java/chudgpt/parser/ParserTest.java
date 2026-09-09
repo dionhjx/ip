@@ -4,10 +4,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.nio.file.Path;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.function.Executable;
+import org.junit.jupiter.api.io.TempDir;
 
 import chudgpt.command.AddTaskCommand;
 import chudgpt.command.ChangeTaskStatusCommand;
@@ -18,14 +20,20 @@ import chudgpt.command.HiCommand;
 import chudgpt.command.ListCommand;
 import chudgpt.command.SaveCommand;
 import chudgpt.exception.ChudException;
+import chudgpt.storage.Storage;
 import chudgpt.task.Deadline;
 import chudgpt.task.Event;
 import chudgpt.task.Task;
+import chudgpt.task.TaskList;
+import chudgpt.ui.Ui;
 
 /** Tests command, task, index, and date parsing behavior. */
 public class ParserTest {
 
     private final Parser parser = new Parser();
+
+    @TempDir
+    private Path temporaryDirectory;
 
     @Test
     public void parse_supportedCommands_returnsExpectedCommandTypes() throws ChudException {
@@ -69,32 +77,32 @@ public class ParserTest {
     }
 
     @Test
-    public void parseDeadlineTask_validInput_deadlineReturnedWithParsedValues() throws ChudException {
-        Task task = parser.parseDeadlineTask("return book /by 2026-09-09");
+    public void parse_deadlineCommand_validInput_deadlineReturnedWithParsedValues() throws ChudException {
+        Task task = parseTaskCommand("deadline return book /by 2026-09-09");
 
         Deadline deadline = assertInstanceOf(Deadline.class, task);
         assertEquals("[D][ ] return book (by: 2026-09-09)", deadline.toString());
     }
 
     @Test
-    public void parseDeadlineTask_missingByArgument_exceptionThrown() {
+    public void parse_deadlineCommand_missingByArgument_exceptionThrown() {
         assertChudException("OOPS!!! There must be a /by argument passed in.",
-                () -> parser.parseDeadlineTask("return book"));
+                () -> parser.parse("deadline return book"));
     }
 
     @Test
-    public void parseDeadlineTask_emptyDescriptionOrDate_exceptionThrown() {
+    public void parse_deadlineCommand_emptyDescriptionOrDate_exceptionThrown() {
         String expectedMessage = "OOPS!!! The description of a deadline cannot be empty";
 
         assertChudException(expectedMessage,
-                () -> parser.parseDeadlineTask(" /by 2026-09-09"));
+                () -> parser.parse("deadline  /by 2026-09-09"));
         assertChudException(expectedMessage,
-                () -> parser.parseDeadlineTask("return book /by "));
+                () -> parser.parse("deadline return book /by "));
     }
 
     @Test
-    public void parseEventTask_validInput_eventReturnedWithParsedValues() throws ChudException {
-        Task task = parser.parseEventTask("project meeting /from 2026-09-09 /to 2026-09-10");
+    public void parse_eventCommand_validInput_eventReturnedWithParsedValues() throws ChudException {
+        Task task = parseTaskCommand("event project meeting /from 2026-09-09 /to 2026-09-10");
 
         Event event = assertInstanceOf(Event.class, task);
         assertEquals("[E][ ] project meeting (from: 2026-09-09 to: 2026-09-10)",
@@ -102,29 +110,29 @@ public class ParserTest {
     }
 
     @Test
-    public void parseEventTask_missingOrMisorderedArguments_exceptionThrown() {
+    public void parse_eventCommand_missingOrMisorderedArguments_exceptionThrown() {
         String expectedMessage = "OOPS!!! Specify the /from argument before the /to argument";
 
         assertChudException(expectedMessage,
-                () -> parser.parseEventTask("project meeting"));
+                () -> parser.parse("event project meeting"));
         assertChudException(expectedMessage,
-                () -> parser.parseEventTask("project meeting /from 2026-09-09"));
+                () -> parser.parse("event project meeting /from 2026-09-09"));
         assertChudException(expectedMessage,
-                () -> parser.parseEventTask("project meeting /to 2026-09-10 /from 2026-09-09"));
+                () -> parser.parse("event project meeting /to 2026-09-10 /from 2026-09-09"));
     }
 
     @Test
-    public void parseEventTask_emptyDescriptionOrDate_exceptionThrown() {
+    public void parse_eventCommand_emptyDescriptionOrDate_exceptionThrown() {
         String expectedMessage = """
                 OOPS!!! The description, start and end date of an event cannot be empty
                 """;
 
         assertChudException(expectedMessage,
-                () -> parser.parseEventTask(" /from 2026-09-09 /to 2026-09-10"));
+                () -> parser.parse("event  /from 2026-09-09 /to 2026-09-10"));
         assertChudException(expectedMessage,
-                () -> parser.parseEventTask("project meeting /from /to 2026-09-10"));
+                () -> parser.parse("event project meeting /from /to 2026-09-10"));
         assertChudException(expectedMessage,
-                () -> parser.parseEventTask("project meeting /from 2026-09-09 /to "));
+                () -> parser.parse("event project meeting /from 2026-09-09 /to "));
     }
 
     @Test
@@ -165,5 +173,20 @@ public class ParserTest {
     private static void assertChudException(String expectedMessage, Executable operation) {
         ChudException exception = assertThrows(ChudException.class, operation);
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    /**
+     * Parses a task command through the public parser API and returns the created task.
+     *
+     * @param command the task command to parse and execute
+     * @return the task created by the command
+     * @throws ChudException if the command is invalid or the task cannot be retrieved
+     */
+    private Task parseTaskCommand(String command) throws ChudException {
+        TaskList tasks = new TaskList();
+        Command parsedCommand = parser.parse(command);
+        parsedCommand.execute(tasks, new Ui(),
+                new Storage(temporaryDirectory.resolve("save.txt").toString()));
+        return tasks.getTask(0);
     }
 }
