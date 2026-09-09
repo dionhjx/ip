@@ -15,8 +15,13 @@ public abstract class Task {
      *
      * @param isCompleted the target status
      */
-    public void setCompleted(boolean isCompleted) {
+    public Task setCompleted(boolean isCompleted) {
         this.isCompleted = isCompleted;
+        return this;
+    }
+
+    public boolean isCompleted() {
+        return isCompleted;
     }
 
     @Override

@@ -12,6 +12,8 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 /** Saves tasks to and loads tasks from the application's data file. */
 public class Storage {
@@ -20,10 +22,10 @@ public class Storage {
     /**
      * Creates storage backed by the specified file.
      *
-     * @param saveFile the file used to store tasks
+     * @param filePath the file path used to store tasks
      */
-    public Storage(Path saveFile) {
-        this.saveFile = saveFile;
+    public Storage(String filePath) {
+        this.saveFile = Path.of(filePath);
     }
 
     /**
@@ -44,25 +46,27 @@ public class Storage {
     }
 
     /**
-     * Loads saved tasks into the supplied task list.
+     * Reads the save file and creates a task list from the saved tasks
      *
-     * @param tasks the task list to populate
+     * @return the task list
      */
-    public void loadInto(TaskList tasks) {
+    public List<Task> load() throws ChudException{
         if (!Files.exists(saveFile)) {
-            return;
+            return new ArrayList<>();
         }
-
+        ArrayList<Task> tasks = new ArrayList<>();
         try {
             for (String line : Files.readAllLines(saveFile, StandardCharsets.UTF_8)) {
                 Task task = parseSavedTask(line);
                 if (task != null) {
-                    tasks.addTask(task);
+                    tasks.add(task);
                 }
             }
-        } catch (IOException | ChudException e) {
-            System.err.println("Error loading task list from file.");
+        } catch (IOException e) {
+            throw new ChudException("Error loading task list from file.");
         }
+        
+        return tasks;
     }
 
     /**
@@ -100,6 +104,5 @@ public class Storage {
         }
         task.setCompleted(isCompleted);
         return task;
-
     }
 }

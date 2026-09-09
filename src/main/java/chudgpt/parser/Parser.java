@@ -1,5 +1,6 @@
 package chudgpt.parser;
 
+import chudgpt.command.*;
 import chudgpt.exception.ChudException;
 import chudgpt.task.Deadline;
 import chudgpt.task.Event;
@@ -12,76 +13,78 @@ import java.util.Locale;
 
 /** Parses task commands and task-number arguments entered by the user. */
 public class Parser {
-    /**
-     * Parses a command that creates a task.
-     *
-     * @param command the complete task command
-     * @return the task represented by the command
-     * @throws ChudException if the command is invalid
-     */
-    public Task parseTask(String command) throws ChudException {
-        String taskCommand = command.trim();
-        String lowerCaseCommand = taskCommand.toLowerCase(Locale.ROOT);
 
-        if (lowerCaseCommand.equals("todo") || lowerCaseCommand.startsWith("todo ")) {
-            String description = taskCommand.substring(4).trim();
-            if (description.isEmpty()) {
-                throw new ChudException("OOPS!!! The description of a todo cannot be empty.");
-            }
-            return new ToDo(description);
+    public Command parse(String command) throws ChudException {
+        if (command == null || command.trim().isEmpty()) {
+            throw new ChudException("Please enter a command.");
         }
 
-        if (lowerCaseCommand.equals("deadline") || lowerCaseCommand.startsWith("deadline ")) {
-            int byIndex = lowerCaseCommand.indexOf("/by");
-            if (byIndex < 0) {
-                throw new ChudException("OOPS!!! There must be a /by argument passed in.");
-            }
+        String[] parts = command.toLowerCase(Locale.ROOT).trim().split("\\s+", 2);
 
-            String description = taskCommand.substring(8, byIndex).trim();
-            String submitBy = taskCommand.substring(byIndex + 3).trim();
-            if (description.isEmpty() || submitBy.isEmpty()) {
-                throw new ChudException("OOPS!!! The description of a deadline cannot be empty");
-            }
-            return new Deadline(description, parseDate(submitBy));
+        String commandName = parts[0];
+        String params = "";
+        if (parts.length > 1) {
+            params = parts[1];
         }
 
-        if (lowerCaseCommand.equals("event") || lowerCaseCommand.startsWith("event ")) {
-            int fromIndex = lowerCaseCommand.indexOf("/from");
-            int toIndex = lowerCaseCommand.indexOf("/to", fromIndex + 5);
-            if (fromIndex < 0 || toIndex < 0 || toIndex <= fromIndex) {
-                throw new ChudException("OOPS!!! Specify the /from argument before the /to argument");
-            }
-
-            String description = taskCommand.substring(5, fromIndex).trim();
-            String start = taskCommand.substring(fromIndex + 5, toIndex).trim();
-            String end = taskCommand.substring(toIndex + 3).trim();
-            if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
-                throw new ChudException("""
-                        OOPS!!! The description, start and end date of an event cannot be empty
-                        """);
-            }
-            return new Event(description, parseDate(start), parseDate(end));
+        switch (commandName) {
+            case ("hi"):
+                return new HiCommand();
+            case ("bye"):
+                return new ExitCommand();
+            case ("list"):
+                return new ListCommand();
+            case ("save"):
+                return new SaveCommand();
+            case ("todo"):
+                return new AddTaskCommand(new ToDo(params));
+            case ("deadline"):
+                return new AddTaskCommand(parseDeadlineTask(params));
+            case ("event"):
+                return new AddTaskCommand(parseEventTask(params));
+            case ("delete"):
+                return new DeleteTaskCommand(parseIndex(params));
+            default:
+                throw new ChudException("Invalid command.");
         }
-
-        throw new ChudException("OOPS!!! I'm sorry, but I don't know what that means :(. I'm such a chud...");
     }
 
-    /**
-     * Parses a command containing a one-based task number and returns its zero-based index.
-     *
-     * @param command the command containing the task number
-     * @param commandName the command name used in usage messages
-     * @return the zero-based task index
-     * @throws ChudException if the command does not contain a valid number
-     */
-    public int parseTaskIndex(String command, String commandName) throws ChudException {
-        String[] parts = command.split("\\s+");
-        if (parts.length != 2) {
-            throw new ChudException("Usage: " + commandName + " <task number>");
+    public Task parseDeadlineTask(String params) throws ChudException {
+        int byIndex = params.indexOf("/by");
+        if (byIndex < 0) {
+            throw new ChudException("OOPS!!! There must be a /by argument passed in.");
         }
 
+        String description = params.substring(0, byIndex).trim();
+        String submitBy = params.substring(byIndex + 3).trim();
+
+        if (description.isEmpty() || submitBy.isEmpty()) {
+            throw new ChudException("OOPS!!! The description of a deadline cannot be empty");
+        }
+        return new Deadline(description, parseDate(submitBy));
+    }
+
+    public Task parseEventTask(String params) throws ChudException {
+        int fromIndex = params.indexOf("/from");
+        int toIndex = params.indexOf("/to", fromIndex + 5);
+        if (fromIndex < 0 || toIndex < 0 || toIndex <= fromIndex) {
+            throw new ChudException("OOPS!!! Specify the /from argument before the /to argument");
+        }
+
+        String description = params.substring(0, fromIndex).trim();
+        String start = params.substring(fromIndex + 5, toIndex).trim();
+        String end = params.substring(toIndex + 3).trim();
+        if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
+            throw new ChudException("""
+                        OOPS!!! The description, start and end date of an event cannot be empty
+                        """);
+        }
+        return new Event(description, parseDate(start), parseDate(end));
+    }
+
+    public static int parseIndex(String params) throws ChudException {
         try {
-            return Integer.parseInt(parts[1]) - 1;
+            return Integer.parseInt(params) - 1;
         } catch (NumberFormatException e) {
             throw new ChudException("Task number must be a number.");
         }
