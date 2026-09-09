@@ -69,7 +69,7 @@ public class ParserTest {
     }
 
     @Test
-    public void parseDeadlineTask_validInput_deadlineReturnedWithParsedValues() throws ChudException {
+    public void buildDeadlineTask_validInput_deadlineReturnedWithParsedValues() throws ChudException {
         Task task = parser.parseDeadlineTask("return book /by 2026-09-09");
 
         Deadline deadline = assertInstanceOf(Deadline.class, task);
@@ -77,13 +77,13 @@ public class ParserTest {
     }
 
     @Test
-    public void parseDeadlineTask_missingByArgument_exceptionThrown() {
+    public void buildDeadlineTask_missingByArgument_exceptionThrown() {
         assertChudException("OOPS!!! There must be a /by argument passed in.",
                 () -> parser.parseDeadlineTask("return book"));
     }
 
     @Test
-    public void parseDeadlineTask_emptyDescriptionOrDate_exceptionThrown() {
+    public void buildDeadlineTask_emptyDescriptionOrDate_exceptionThrown() {
         String expectedMessage = "OOPS!!! The description of a deadline cannot be empty";
 
         assertChudException(expectedMessage,
@@ -93,7 +93,7 @@ public class ParserTest {
     }
 
     @Test
-    public void parseEventTask_validInput_eventReturnedWithParsedValues() throws ChudException {
+    public void buildEventTask_validInput_eventReturnedWithParsedValues() throws ChudException {
         Task task = parser.parseEventTask("project meeting /from 2026-09-09 /to 2026-09-10");
 
         Event event = assertInstanceOf(Event.class, task);
@@ -102,7 +102,7 @@ public class ParserTest {
     }
 
     @Test
-    public void parseEventTask_missingOrMisorderedArguments_exceptionThrown() {
+    public void buildEventTask_missingOrMisorderedArguments_exceptionThrown() {
         String expectedMessage = "OOPS!!! Specify the /from argument before the /to argument";
 
         assertChudException(expectedMessage,
@@ -114,7 +114,7 @@ public class ParserTest {
     }
 
     @Test
-    public void parseEventTask_emptyDescriptionOrDate_exceptionThrown() {
+    public void buildEventTask_emptyDescriptionOrDate_exceptionThrown() {
         String expectedMessage = """
                 OOPS!!! The description, start and end date of an event cannot be empty
                 """;

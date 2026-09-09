@@ -14,6 +14,13 @@ import java.util.Locale;
 /** Parses task commands and task-number arguments entered by the user. */
 public class Parser {
 
+    /**
+     * Parses a command entered by the user
+     *
+     * @param command the string entered by the user
+     * @return the command the string corresponds to
+     * @throws ChudException if an unknown command is input
+     */
     public Command parse(String command) throws ChudException {
         if (command == null || command.trim().isEmpty()) {
             throw new ChudException("Please enter a command.");
@@ -39,9 +46,9 @@ public class Parser {
             case ("todo"):
                 return new AddTaskCommand(new ToDo(params));
             case ("deadline"):
-                return new AddTaskCommand(parseDeadlineTask(params));
+                return new AddTaskCommand(buildDeadlineTask(params));
             case ("event"):
-                return new AddTaskCommand(parseEventTask(params));
+                return new AddTaskCommand(buildEventTask(params));
             case ("delete"):
                 return new DeleteTaskCommand(parseIndex(params));
             case ("mark"):
@@ -53,7 +60,7 @@ public class Parser {
         }
     }
 
-    public Task parseDeadlineTask(String params) throws ChudException {
+    private Task buildDeadlineTask(String params) throws ChudException {
         int byIndex = params.indexOf("/by");
         if (byIndex < 0) {
             throw new ChudException("OOPS!!! There must be a /by argument passed in.");
@@ -68,7 +75,7 @@ public class Parser {
         return new Deadline(description, parseDate(submitBy));
     }
 
-    public Task parseEventTask(String params) throws ChudException {
+    private Task buildEventTask(String params) throws ChudException {
         int fromIndex = params.indexOf("/from");
         int toIndex = params.indexOf("/to", fromIndex + 5);
         if (fromIndex < 0 || toIndex < 0 || toIndex <= fromIndex) {
@@ -86,6 +93,13 @@ public class Parser {
         return new Event(description, parseDate(start), parseDate(end));
     }
 
+    /**
+     * Parses a string representing a one-indexed index
+     *
+     * @param params the string representing the one-indexed index
+     * @return the zero-indexed index
+     * @throws ChudException if the string cannot be parsed
+     */
     public static int parseIndex(String params) throws ChudException {
         try {
             return Integer.parseInt(params) - 1;
@@ -94,6 +108,13 @@ public class Parser {
         }
     }
 
+    /**
+     * Parses a string representing a date
+     *
+     * @param value the string representing the date
+     * @return the date
+     * @throws ChudException if the string cannot be parsed
+     */
     public static LocalDate parseDate(String value) throws ChudException {
         try {
             return LocalDate.parse(value);

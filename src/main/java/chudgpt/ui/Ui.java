@@ -13,9 +13,7 @@ import java.util.Scanner;
 public class Ui {
     private Scanner input = new Scanner(System.in);
 
-    /**
-     * Shows the welcome message
-     */
+    /** Displays the welcome message
     public void showWelcomeMessage() {
         showLine();
         try {
@@ -60,16 +58,12 @@ public class Ui {
         System.out.println("Here are the tasks in your list:\n" + tasks);
     }
 
-    /**
-     * Displays the greeting message
-     */
+    /** Displays the greeting message */
     public void showHiMessage() {
         System.out.println("Hi! I'm ChudGPT. How can I help you?");
     }
 
-    /**
-     * Displays the goodbye message
-     */
+    /** Displays the goodbye message */
     public void showByeMessage() {
         System.out.println("Bye. Hope to see you again soon!");
     }
@@ -96,6 +90,11 @@ public class Ui {
         showListSizeMessage(size);
     }
 
+    /**
+     * Displays the message after updating a task's completion status
+     *
+     * @param task the updated task
+     */
     public void showUpdateTaskMessage(Task task) {
         System.out.println(task.isCompleted()
                 ? "Nice! I've marked this task as completed!"
@@ -103,13 +102,12 @@ public class Ui {
                 task);
     }
 
+    /** Displays the message showing updated task list size */
     private void showListSizeMessage(int size) {
         System.out.println("You have " + size + " tasks in your list:");
     }
 
-    /**
-     * Displays the save message
-     */
+    /** Displays the save message */
     public void showSaveMessage() {
         System.out.println("I've saved your current list of tasks.");
     }
@@ -129,16 +127,12 @@ public class Ui {
     }
 
 
-    /**
-     * Shows the divider line
-     */
+    /** Shows the divider line */
     public void showLine() {
         System.out.println("____________________________________________________________");
     }
 
-    /**
-     * Shows the error message when unable to load the save file.
-     */
+    /** Shows the error message when unable to load the save file */
     public void showLoadError() {
         System.out.println("OOPS!!! I couldn't retrieve the save file :( I'm such a chud...");
     }
