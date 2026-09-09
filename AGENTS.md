@@ -36,6 +36,10 @@ After every code update:
 2. Invoke the project-specific `$test-ui` skill to run the UI test plan. The skill must print the console input/output transcript and stop at the first failure.
 3. Update `docs/README.md` with any user-visible behavior or usage changes.
 
+## JUnit testing target
+
+Maintain JUnit coverage for approximately the highest-value 50% of methods in each class under test, prioritizing complex, core, or critical business logic. Update the relevant JUnit tests after every code change so the test suite continues to meet this target and covers new or changed behavior.
+
 ## Git
 
 Use lightweight tags unless the user requests an annotated tag.
