@@ -52,12 +52,21 @@ public class Ui {
      * @param tasks the current tasks in your list
      */
     public void listTasks(TaskList tasks) {
-        String message;
         if (tasks.size() == 0) {
             System.out.println("You have no tasks in your list! Try adding some");
             return;
         }
         System.out.println("Here are the tasks in your list:\n" + tasks);
+    }
+
+    public void listMatches(TaskList matches) {
+        String message;
+        if (matches.size() == 0) {
+            System.out.println("I couldn't find any tasks that contains that keyword.");
+            return;
+        }
+
+        System.out.println("Here are the matching tasks in your list:\n" + matches);
     }
 
     /**
@@ -104,7 +113,7 @@ public class Ui {
     }
 
     private void showListSizeMessage(int size) {
-        System.out.println("You have " + size + " tasks in your list:");
+        System.out.println("Now you have " + size + " tasks in your list.");
     }
 
     /**

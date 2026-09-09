@@ -19,7 +19,6 @@ public class ChudGPT {
 
 
     public ChudGPT(String filePath) {
-        TaskList tasks1;
         ui = new Ui();
         storage = new Storage(filePath);
         parser = new Parser();

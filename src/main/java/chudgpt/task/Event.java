@@ -25,6 +25,6 @@ public class Event extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("E | %d | %s | %s | %s", isCompleted ? 1 : 0, task, start, end);
+        return String.format("E | %d | %s | %s | %s", isCompleted ? 1 : 0, description, start, end);
     }
 }

@@ -48,6 +48,8 @@ public class Parser {
                 return new ChangeTaskStatusCommand(parseIndex(params), true);
             case ("unmark"):
                 return new ChangeTaskStatusCommand(parseIndex(params), false);
+            case ("find"):
+                return new FindCommand(params);
             default:
                 throw new ChudException("Invalid command.");
         }

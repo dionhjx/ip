@@ -23,6 +23,6 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, task, by);
+        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, description, by);
     }
 }

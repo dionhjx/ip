@@ -3,10 +3,10 @@ package chudgpt.task;
 /** Common state and display behavior shared by all supported task types. */
 public abstract class Task {
     protected boolean isCompleted;
-    protected final String task;
+    protected final String description;
 
-    protected Task(String task) {
-        this.task = task;
+    protected Task(String description) {
+        this.description = description;
         isCompleted = false;
     }
 
@@ -26,7 +26,7 @@ public abstract class Task {
 
     @Override
     public String toString() {
-        return String.format("[%s] %s", isCompleted ? "X" : " ", task);
+        return String.format("[%s] %s", isCompleted ? "X" : " ", description);
     }
 
     /**

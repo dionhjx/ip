@@ -18,6 +18,6 @@ public class ToDo extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("T | %d | %s", isCompleted ? 1 : 0, task);
+        return String.format("T | %d | %s", isCompleted ? 1 : 0, description);
     }
 }
