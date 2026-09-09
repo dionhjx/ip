@@ -1,20 +1,21 @@
 package chudgpt.ui;
 
-import chudgpt.ChudGPT;
-import chudgpt.exception.ChudException;
-import chudgpt.task.Task;
-import chudgpt.task.TaskList;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
+import chudgpt.ChudGPT;
+import chudgpt.exception.ChudException;
+import chudgpt.task.Task;
+import chudgpt.task.TaskList;
+
+/** Handles console input and output for the ChudGPT application. */
 public class Ui {
-    private Scanner input = new Scanner(System.in);
+    private final Scanner input = new Scanner(System.in);
 
     /**
-     * Shows the welcome message
+     * Shows the welcome message.
      */
     public void showWelcomeMessage() {
         showLine();
@@ -28,11 +29,11 @@ public class Ui {
     }
 
     /**
-     * Displays the ChudGPT logo
+     * Displays the ChudGPT logo.
      *
-     * @throws ChudException if the logo resource cannot be read
+     * @throws ChudException if the logo resource cannot be read.
      */
-    public void showLogo() throws ChudException{
+    public void showLogo() throws ChudException {
         String logo;
         try (InputStream logoStream = ChudGPT.class.getResourceAsStream("/logo.txt")) {
             if (logoStream == null) {
@@ -47,12 +48,11 @@ public class Ui {
     }
 
     /**
-     * Lists the current tasks
+     * Lists the current tasks.
      *
-     * @param tasks the current tasks in your list
+     * @param tasks the current tasks in your list.
      */
     public void listTasks(TaskList tasks) {
-        String message;
         if (tasks.size() == 0) {
             System.out.println("You have no tasks in your list! Try adding some");
             return;
@@ -61,24 +61,24 @@ public class Ui {
     }
 
     /**
-     * Displays the greeting message
+     * Displays the greeting message.
      */
     public void showHiMessage() {
         System.out.println("Hi! I'm ChudGPT. How can I help you?");
     }
 
     /**
-     * Displays the goodbye message
+     * Displays the goodbye message.
      */
     public void showByeMessage() {
         System.out.println("Bye. Hope to see you again soon!");
     }
 
     /**
-     * Displays the message after adding a task
+     * Displays the message after adding a task.
      *
-     * @param task the task that was added
-     * @param size the updated size of the task list
+     * @param task the task that was added.
+     * @param size the updated size of the task list.
      */
     public void showAddTaskMessage(Task task, int size) {
         System.out.println("Got it. I've added this task:\n  " + task);
@@ -86,16 +86,21 @@ public class Ui {
     }
 
     /**
-     * Displays the message after deleting a task
+     * Displays the message after deleting a task.
      *
-     * @param task the task that was deleted
-     * @param size the updated size of the task list
+     * @param task the task that was deleted.
+     * @param size the updated size of the task list.
      */
     public void showDeleteTaskMessage(Task task, int size) {
         System.out.println("Got it. Noted. I've removed this task:\n  " + task);
         showListSizeMessage(size);
     }
 
+    /**
+     * Displays the message after changing a task's completion status.
+     *
+     * @param task task whose status was changed.
+     */
     public void showUpdateTaskMessage(Task task) {
         System.out.println(task.isCompleted()
                 ? "Nice! I've marked this task as completed!"
@@ -108,29 +113,32 @@ public class Ui {
     }
 
     /**
-     * Displays the save message
+     * Displays the save message.
      */
     public void showSaveMessage() {
         System.out.println("I've saved your current list of tasks.");
     }
 
-
     /**
-     * Displays an error message
+     * Displays an error message.
      *
-     * @param errMessage the message associated with the error
+     * @param errMessage the message associated with the error.
      */
     public void showErrorMessage(String errMessage) {
         System.out.println("OOPS!!! I've run into an error :( I'm such a chud...\nDetails:\n  " + errMessage);
     }
 
+    /**
+     * Reads the next command from standard input.
+     *
+     * @return next command entered by the user.
+     */
     public String readCommand() {
         return input.nextLine();
     }
 
-
     /**
-     * Shows the divider line
+     * Shows the divider line.
      */
     public void showLine() {
         System.out.println("____________________________________________________________");

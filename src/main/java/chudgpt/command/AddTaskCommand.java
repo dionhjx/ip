@@ -5,9 +5,15 @@ import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
+/** Adds one task to the current task list. */
 public class AddTaskCommand extends Command {
-    private Task taskToAdd;
+    private final Task taskToAdd;
 
+    /**
+     * Creates a command that adds the specified task.
+     *
+     * @param taskToAdd task to add when the command executes.
+     */
     public AddTaskCommand(Task taskToAdd) {
         this.taskToAdd = taskToAdd;
     }

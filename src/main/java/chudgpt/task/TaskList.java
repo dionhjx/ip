@@ -1,23 +1,30 @@
 package chudgpt.task;
 
-import chudgpt.exception.ChudException;
-
 import java.util.ArrayList;
 import java.util.List;
 
+import chudgpt.exception.ChudException;
+
+/** Stores tasks in their display and serialization order. */
 public class TaskList {
-    private final ArrayList<Task> tasks;
+    private final List<Task> tasks;
 
+    /** Creates an empty task list. */
     public TaskList() {
-        tasks = new ArrayList<Task>();
-    }
-
-    public TaskList(List<Task> tasks) {
-        this.tasks = (ArrayList<Task>) tasks;
+        tasks = new ArrayList<>();
     }
 
     /**
-     * Adds a task to the list
+     * Creates a task list containing the supplied tasks.
+     *
+     * @param tasks tasks to copy into the list.
+     */
+    public TaskList(List<Task> tasks) {
+        this.tasks = new ArrayList<>(tasks);
+    }
+
+    /**
+     * Adds a task to the list.
      *
      * @param task the task to be added
      * @return the task that was added
@@ -28,7 +35,7 @@ public class TaskList {
     }
 
     /**
-     * Removes the specified task from the list
+     * Removes the specified task from the list.
      *
      * @param index the index of the task to be removed
      * @return the task that was removed
@@ -43,7 +50,7 @@ public class TaskList {
     }
 
     /**
-     * Returns a specified task from the list
+     * Returns the specified task from the list.
      *
      * @param index the index of the task to be returned
      * @return the selected task
@@ -57,6 +64,14 @@ public class TaskList {
         return tasks.get(index);
     }
 
+    /**
+     * Updates the completion status of the task at the specified index.
+     *
+     * @param index index of the task to update.
+     * @param isCompleted target completion status.
+     * @return the updated task.
+     * @throws ChudException if the index is out of range.
+     */
     public Task updateTask(int index, boolean isCompleted) throws ChudException {
         if (index < 0 || index >= tasks.size()) {
             throw new ChudException("Index out of bounds.");
@@ -65,6 +80,11 @@ public class TaskList {
         return tasks.get(index).setCompleted(isCompleted);
     }
 
+    /**
+     * Returns the number of tasks in the list.
+     *
+     * @return number of tasks.
+     */
     public int size() {
         return tasks.size();
     }

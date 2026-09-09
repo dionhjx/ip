@@ -2,6 +2,11 @@ package chudgpt.task;
 
 /** A task without a deadline or event times. */
 public class ToDo extends Task {
+    /**
+     * Creates a ToDo with the specified description.
+     *
+     * @param task task description.
+     */
     public ToDo(String task) {
         super(task);
     }

@@ -6,9 +6,15 @@ import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
+/** Deletes one task from the current task list. */
 public class DeleteTaskCommand extends Command {
-    private int taskIndex;
+    private final int taskIndex;
 
+    /**
+     * Creates a command that deletes the task at the specified index.
+     *
+     * @param taskIndex zero-based index of the task to delete.
+     */
     public DeleteTaskCommand(int taskIndex) {
         this.taskIndex = taskIndex;
     }

@@ -4,9 +4,19 @@ import java.time.LocalDate;
 
 /** A task that takes place during a specified time range. */
 public class Event extends Task {
+    /** Start date of this event. */
     protected final LocalDate start;
+
+    /** End date of this event. */
     protected final LocalDate end;
 
+    /**
+     * Creates an event task with the specified description and date range.
+     *
+     * @param task task description.
+     * @param start event start date.
+     * @param end event end date.
+     */
     public Event(String task, LocalDate start, LocalDate end) {
         super(task);
         this.start = start;

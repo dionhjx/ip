@@ -2,16 +2,24 @@ package chudgpt.task;
 
 /** Common state and display behavior shared by all supported task types. */
 public abstract class Task {
+    /** Whether this task is complete. */
     protected boolean isCompleted;
+
+    /** Description of this task. */
     protected final String task;
 
+    /**
+     * Creates an incomplete task with the specified description.
+     *
+     * @param task task description.
+     */
     protected Task(String task) {
         this.task = task;
         isCompleted = false;
     }
 
     /**
-     * Changes the status of the task
+     * Changes the completion status of the task.
      *
      * @param isCompleted the target status
      */

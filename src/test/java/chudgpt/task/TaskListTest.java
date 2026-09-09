@@ -6,6 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import chudgpt.exception.ChudException;
@@ -23,6 +25,18 @@ public class TaskListTest {
         assertSame(task, addedTask);
         assertEquals(1, taskList.size());
         assertSame(task, taskList.getTask(0));
+    }
+
+    @Test
+    public void constructor_taskListInput_tasksCopied() {
+        ToDo task = new ToDo("task");
+        List<Task> sourceTasks = List.of(task);
+
+        TaskList taskList = new TaskList(sourceTasks);
+        taskList.addTask(new ToDo("another task"));
+
+        assertEquals(1, sourceTasks.size());
+        assertEquals(2, taskList.size());
     }
 
     @Test

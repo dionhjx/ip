@@ -4,6 +4,7 @@ import chudgpt.storage.Storage;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
+/** Saves the current task list and exits the application. */
 public class ExitCommand extends Command {
     @Override
     public boolean isExit() {
