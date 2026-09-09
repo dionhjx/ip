@@ -19,5 +19,9 @@ _temp/
 # Project-specific Codex skill
 /.codex/skills/present-changes-visually/
 
-/text-ui-test/ACTUAL.TXT
-text-ui-test/EXPECTED-UNIX.TXT
+# Data
+data/*
+
+# Codex Tests
+/test/
+/.codex/
