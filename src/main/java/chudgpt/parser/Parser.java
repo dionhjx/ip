@@ -44,6 +44,10 @@ public class Parser {
                 return new AddTaskCommand(parseEventTask(params));
             case ("delete"):
                 return new DeleteTaskCommand(parseIndex(params));
+            case ("mark"):
+                return new ChangeTaskStatusCommand(parseIndex(params), true);
+            case ("unmark"):
+                return new ChangeTaskStatusCommand(parseIndex(params), false);
             default:
                 throw new ChudException("Invalid command.");
         }
