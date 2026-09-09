@@ -9,7 +9,7 @@ public class Deadline extends Task {
     /**
      * Creates a deadline task which contains a date to submit by
      *
-     * @param task the description of the task
+     * @param description the description of the task
      * @param submitBy the date to submit the task by
      */
     public Deadline(String description, LocalDate submitBy) {

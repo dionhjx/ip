@@ -13,7 +13,7 @@ import java.util.Scanner;
 public class Ui {
     private Scanner input = new Scanner(System.in);
 
-    /** Displays the welcome message
+    /** Displays the welcome message */
     public void showWelcomeMessage() {
         showLine();
         try {
