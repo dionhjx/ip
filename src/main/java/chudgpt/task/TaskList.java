@@ -2,6 +2,8 @@ package chudgpt.task;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 import chudgpt.exception.ChudException;
 
@@ -88,6 +90,21 @@ public class TaskList {
     public int size() {
         return tasks.size();
     }
+
+    /**
+     * Finds all tasks whose descriptions have the keyword
+     *
+     * @param keyword the keyword to search for
+     * @return
+     */
+    public TaskList findTasks(String keyword) {
+        List<Task> matches = tasks.stream().filter(task -> task.description
+                .toLowerCase(Locale.ROOT)
+                .contains(keyword.toLowerCase(Locale.ROOT)))
+                .collect(Collectors.toList());
+        return new TaskList(matches);
+    }
+
 
     /**
      * Formats all tasks in the list into a single serialized string suitable for file storage.

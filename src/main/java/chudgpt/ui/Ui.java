@@ -14,9 +14,7 @@ import chudgpt.task.TaskList;
 public class Ui {
     private final Scanner input = new Scanner(System.in);
 
-    /**
-     * Shows the welcome message.
-     */
+    /** Shows the welcome message. */
     public void showWelcomeMessage() {
         showLine();
         try {
@@ -58,6 +56,20 @@ public class Ui {
             return;
         }
         System.out.println("Here are the tasks in your list:\n" + tasks);
+    }
+
+    /**
+     * Lists the matched tasks.
+     *
+     * @param matches the matched tasks that were found.
+     */
+    public void listMatches(TaskList matches) {
+        if (matches.size() == 0) {
+            System.out.println("I couldn't find any tasks that contains that keyword.");
+            return;
+        }
+
+        System.out.println("Here are the matching tasks in your list:\n" + matches);
     }
 
     /** Displays the greeting message. */
@@ -106,7 +118,7 @@ public class Ui {
 
     /** Displays the message showing updated task list size. */
     private void showListSizeMessage(int size) {
-        System.out.println("You have " + size + " tasks in your list:");
+        System.out.println("Now you have " + size + " tasks in your list.");
     }
 
     /** Displays the save message. */
