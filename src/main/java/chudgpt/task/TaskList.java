@@ -57,6 +57,14 @@ public class TaskList {
         return tasks.get(index);
     }
 
+    public Task updateTask(int index, boolean isCompleted) throws ChudException {
+        if (index < 0 || index >= tasks.size()) {
+            throw new ChudException("Index out of bounds.");
+        }
+
+        return tasks.get(index).setCompleted(isCompleted);
+    }
+
     public int size() {
         return tasks.size();
     }

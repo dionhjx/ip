@@ -1,5 +1,7 @@
 package chudgpt.parser;
 
+import chudgpt.command.Command;
+import chudgpt.command.HiCommand;
 import chudgpt.exception.ChudException;
 import chudgpt.task.Deadline;
 import chudgpt.task.Event;
@@ -12,6 +14,11 @@ import java.util.Locale;
 
 /** Parses task commands and task-number arguments entered by the user. */
 public class Parser {
+
+    public Command parse(String command) {
+        return new HiCommand();
+    }
+
     /**
      * Parses a command that creates a task.
      *
