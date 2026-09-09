@@ -5,17 +5,14 @@ import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
-/**
- * Represents a command that adds a task to the current task list.
- */
+/** Adds one task to the current task list. */
 public class AddTaskCommand extends Command {
-    /** The task that will be added when this command executes. */
     private final Task taskToAdd;
 
     /**
-     * Creates an add-task command.
+     * Creates a command that adds the specified task.
      *
-     * @param taskToAdd the task to add to the task list
+     * @param taskToAdd task to add when the command executes.
      */
     public AddTaskCommand(Task taskToAdd) {
         this.taskToAdd = taskToAdd;
@@ -28,6 +25,7 @@ public class AddTaskCommand extends Command {
      * @param ui the UI handler used to display the confirmation
      * @param storage the storage handler used to save the updated list
      */
+    @Override
     public void execute(TaskList tasks, Ui ui, Storage storage) {
         tasks.addTask(taskToAdd);
         storage.save(tasks);

@@ -1,11 +1,12 @@
 package chudgpt.exception;
 
-/** Exceptions that are caused when using ChudGPT */
-public class ChudException extends Exception{
+/** Represents a recoverable error raised by the ChudGPT application. */
+public class ChudException extends Exception {
+
     /**
-     * Creates a ChudException
+     * Creates an exception with the specified message.
      *
-     * @param message the error message
+     * @param message description of the application error.
      */
     public ChudException(String message) {
         super(message);

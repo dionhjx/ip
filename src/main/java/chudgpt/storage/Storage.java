@@ -1,5 +1,12 @@
 package chudgpt.storage;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+
 import chudgpt.exception.ChudException;
 import chudgpt.parser.Parser;
 import chudgpt.task.Deadline;
@@ -8,13 +15,6 @@ import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 import chudgpt.task.ToDo;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-
 /** Saves tasks to and loads tasks from the application's data file. */
 public class Storage {
     private final Path saveFile;
@@ -22,7 +22,7 @@ public class Storage {
     /**
      * Creates storage backed by the specified file.
      *
-     * @param filePath the file path used to store tasks
+     * @param filePath the file path used to store tasks.
      */
     public Storage(String filePath) {
         this.saveFile = Path.of(filePath);
@@ -31,8 +31,8 @@ public class Storage {
     /**
      * Saves the current task list.
      *
-     * @param tasks the tasks to save
-     * @return whether saving succeeded
+     * @param tasks the tasks to save.
+     * @return whether saving succeeded.
      */
     public boolean save(TaskList tasks) {
         try {
@@ -46,15 +46,15 @@ public class Storage {
     }
 
     /**
-     * Reads the save file and creates a task list from the saved tasks
+     * Reads the save file and creates a task list from the saved tasks.
      *
-     * @return the task list
+     * @return the task list.
      */
-    public List<Task> load() throws ChudException{
+    public List<Task> load() throws ChudException {
         if (!Files.exists(saveFile)) {
             return new ArrayList<>();
         }
-        ArrayList<Task> tasks = new ArrayList<>();
+        List<Task> tasks = new ArrayList<>();
         try {
             for (String line : Files.readAllLines(saveFile, StandardCharsets.UTF_8)) {
                 Task task = parseSavedTask(line);
@@ -65,15 +65,15 @@ public class Storage {
         } catch (IOException e) {
             throw new ChudException("Error loading task list from file.");
         }
-        
+
         return tasks;
     }
 
     /**
      * Returns the task represented by a saved task record, or {@code null} if malformed.
      *
-     * @param line the serialized task record
-     * @return the parsed task, or {@code null} when the record cannot be parsed
+     * @param line the serialized task record.
+     * @return the parsed task, or {@code null} when the record cannot be parsed.
      */
     private Task parseSavedTask(String line) throws ChudException {
         String[] parts = line.split("\\s*\\|\\s*", -1);

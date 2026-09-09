@@ -1,10 +1,10 @@
 package chudgpt;
 
 import chudgpt.command.Command;
-import chudgpt.task.TaskList;
 import chudgpt.exception.ChudException;
 import chudgpt.parser.Parser;
 import chudgpt.storage.Storage;
+import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
 /**
@@ -14,30 +14,31 @@ public class ChudGPT {
     private final TaskList tasks;
     private final Parser parser;
     private final Ui ui;
+    /** Relative location of the task data, kept portable across operating systems. */
     private final Storage storage;
 
     /**
-     * Creates a ChudGPT chatbot
+     * Creates a ChudGPT application backed by the specified data file.
      *
-     * @param filePath the file path for the storage file
+     * @param filePath path to the file used to load and save tasks.
      */
     public ChudGPT(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
         parser = new Parser();
 
-        TaskList tempTasks;
+        TaskList loadedTasks;
         try {
-            tempTasks = new TaskList(storage.load());
+            loadedTasks = new TaskList(storage.load());
         } catch (ChudException e) {
             ui.showLoadError();
-            tempTasks = new TaskList();
+            loadedTasks = new TaskList();
         }
 
-        tasks = tempTasks;
+        tasks = loadedTasks;
     }
 
-    /** Runs the ChudGPT chatbot */
+    /** Runs the command-line application. */
     public void run() {
         ui.showWelcomeMessage();
 

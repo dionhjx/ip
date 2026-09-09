@@ -1,8 +1,11 @@
 package chudgpt.task;
 
-/** A task with a description and a completion status */
+/** Common state and display behavior shared by all supported task types. */
 public abstract class Task {
+    /** Whether this task is complete. */
     protected boolean isCompleted;
+
+    /** Description of this task. */
     protected final String description;
 
     protected Task(String description) {
@@ -11,7 +14,7 @@ public abstract class Task {
     }
 
     /**
-     * Changes the status of the task
+     * Changes the completion status of the task.
      *
      * @param isCompleted the target status
      */

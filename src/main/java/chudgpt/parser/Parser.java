@@ -1,28 +1,35 @@
 package chudgpt.parser;
 
-import chudgpt.command.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.Locale;
+
+import chudgpt.command.AddTaskCommand;
+import chudgpt.command.ChangeTaskStatusCommand;
+import chudgpt.command.Command;
+import chudgpt.command.DeleteTaskCommand;
+import chudgpt.command.ExitCommand;
+import chudgpt.command.HiCommand;
+import chudgpt.command.ListCommand;
+import chudgpt.command.SaveCommand;
 import chudgpt.exception.ChudException;
 import chudgpt.task.Deadline;
 import chudgpt.task.Event;
 import chudgpt.task.Task;
 import chudgpt.task.ToDo;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-import java.util.Locale;
-
 /** Parses task commands and task-number arguments entered by the user. */
 public class Parser {
 
     /**
-     * Parses a command entered by the user
+     * Parses a user command into an executable command object.
      *
-     * @param command the string entered by the user
-     * @return the command the string corresponds to
-     * @throws ChudException if an unknown command is input
+     * @param command raw command entered by the user.
+     * @return command represented by the input.
+     * @throws ChudException if the input is blank or unsupported.
      */
     public Command parse(String command) throws ChudException {
-        if (command == null || command.trim().isEmpty()) {
+        if (command == null || command.isBlank()) {
             throw new ChudException("Please enter a command.");
         }
 
@@ -35,32 +42,39 @@ public class Parser {
         }
 
         switch (commandName) {
-            case ("hi"):
+            case "hi":
                 return new HiCommand();
-            case ("bye"):
+            case "bye":
                 return new ExitCommand();
-            case ("list"):
+            case "list":
                 return new ListCommand();
-            case ("save"):
+            case "save":
                 return new SaveCommand();
-            case ("todo"):
+            case "todo":
                 return new AddTaskCommand(new ToDo(params));
-            case ("deadline"):
-                return new AddTaskCommand(buildDeadlineTask(params));
-            case ("event"):
-                return new AddTaskCommand(buildEventTask(params));
-            case ("delete"):
+            case "deadline":
+                return new AddTaskCommand(createDeadlineTask(params));
+            case "event":
+                return new AddTaskCommand(createEventTask(params));
+            case "delete":
                 return new DeleteTaskCommand(parseIndex(params));
-            case ("mark"):
+            case "mark":
                 return new ChangeTaskStatusCommand(parseIndex(params), true);
-            case ("unmark"):
+            case "unmark":
                 return new ChangeTaskStatusCommand(parseIndex(params), false);
             default:
                 throw new ChudException("Invalid command.");
         }
     }
 
-    private Task buildDeadlineTask(String params) throws ChudException {
+    /**
+     * Parses a deadline task from its description and due date.
+     *
+     * @param params task description followed by a {@code /by} date.
+     * @return parsed deadline task.
+     * @throws ChudException if the deadline arguments are missing or invalid.
+     */
+    public Task createDeadlineTask(String params) throws ChudException {
         int byIndex = params.indexOf("/by");
         if (byIndex < 0) {
             throw new ChudException("OOPS!!! There must be a /by argument passed in.");
@@ -75,7 +89,14 @@ public class Parser {
         return new Deadline(description, parseDate(submitBy));
     }
 
-    private Task buildEventTask(String params) throws ChudException {
+    /**
+     * Parses an event task from its description and date range.
+     *
+     * @param params task description followed by {@code /from} and {@code /to} dates.
+     * @return parsed event task.
+     * @throws ChudException if the event arguments are missing or invalid.
+     */
+    public Task createEventTask(String params) throws ChudException {
         int fromIndex = params.indexOf("/from");
         int toIndex = params.indexOf("/to", fromIndex + 5);
         if (fromIndex < 0 || toIndex < 0 || toIndex <= fromIndex) {
@@ -94,11 +115,11 @@ public class Parser {
     }
 
     /**
-     * Parses a string representing a one-indexed index
+     * Converts a one-based task number into a zero-based list index.
      *
-     * @param params the string representing the one-indexed index
-     * @return the zero-indexed index
-     * @throws ChudException if the string cannot be parsed
+     * @param params task number entered by the user.
+     * @return zero-based task index.
+     * @throws ChudException if the value is not an integer.
      */
     public static int parseIndex(String params) throws ChudException {
         try {
@@ -109,11 +130,11 @@ public class Parser {
     }
 
     /**
-     * Parses a string representing a date
+     * Parses an ISO-8601 calendar date.
      *
-     * @param value the string representing the date
-     * @return the date
-     * @throws ChudException if the string cannot be parsed
+     * @param value date in {@code yyyy-mm-dd} format.
+     * @return parsed calendar date.
+     * @throws ChudException if the value is not a valid date.
      */
     public static LocalDate parseDate(String value) throws ChudException {
         try {

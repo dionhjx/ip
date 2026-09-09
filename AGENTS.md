@@ -2,6 +2,10 @@
 
 This repository is a starter template for a greenfield Java project used in an introductory software engineering course in an undergraduate computer science program. Students use it as the starting point for their own projects.
 
+All Java code in this project MUST follow `.codex/skills/seedu-java-coding-standard/SKILL.md`, which is based on the SE-EDU basic and intermediate Java coding standard. Apply it to production code and tests when creating, modifying, or reviewing code.
+
+All future commits in this project MUST follow `.codex/skills/seedu-git-standard/SKILL.md`, which is based on the SE-EDU Git conventions. Apply it when naming branches and when preparing, reviewing, or proposing commit messages.
+
 # Default user context
 
 Unless the user says otherwise, assume that you are assisting a student working on a project in this repository. If the user identifies themselves as an instructor or another project stakeholder, adapt your response to that role.

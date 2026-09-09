@@ -6,22 +6,19 @@ import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
-/**
- * Represents a command that changes whether a task is marked as completed.
- */
+/** Changes the completion status of one task. */
 public class ChangeTaskStatusCommand extends Command {
-    /** The one-based position of the task whose status will be changed. */
-    private int taskIndex;
-    /** The completion status to assign to the selected task. */
-    private boolean isCompleted;
+    private final int taskIndex;
+    private final boolean isCompleted;
 
     /**
-     * Creates a task-status command.
+     * Creates a command that changes a task to the specified completion status.
      *
-     * @param taskIndex the one-based position of the task to update
-     * @param isCompleted whether the task should be marked as completed
+     * @param taskIndex zero-based index of the task to update.
+     * @param isCompleted target completion status.
      */
-    public ChangeTaskStatusCommand(int taskIndex, Boolean isCompleted) {
+    public ChangeTaskStatusCommand(int taskIndex, boolean isCompleted) {
+        this.taskIndex = taskIndex;
         this.isCompleted = isCompleted;
     }
 

@@ -5,9 +5,7 @@ import chudgpt.storage.Storage;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
-/**
- * Represents a command that saves the current task list on demand.
- */
+/** Saves the current task list. */
 public class SaveCommand extends Command {
     /**
      * Saves the current task list and displays a confirmation message.

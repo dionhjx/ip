@@ -4,9 +4,7 @@ import chudgpt.storage.Storage;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
-/**
- * Represents a command that displays a greeting message.
- */
+/** Displays a greeting from ChudGPT. */
 public class HiCommand extends Command {
     /**
      * Displays the greeting through the UI handler.

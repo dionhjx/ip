@@ -4,15 +4,8 @@ import chudgpt.storage.Storage;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
-/**
- * Represents a command that saves the current task list and exits the application.
- */
+/** Saves the current task list and exits the application. */
 public class ExitCommand extends Command {
-    /**
-     * Identifies this command as the command that terminates the application loop.
-     *
-     * @return {@code true} because this command exits the application
-     */
     @Override
     public boolean isExit() {
         return true;

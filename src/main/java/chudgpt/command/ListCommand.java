@@ -4,9 +4,7 @@ import chudgpt.storage.Storage;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
-/**
- * Represents a command that displays all tasks in the current task list.
- */
+/** Displays all tasks in the current task list. */
 public class ListCommand extends Command {
     /**
      * Displays the current task list through the UI handler.

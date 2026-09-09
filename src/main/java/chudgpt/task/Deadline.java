@@ -4,22 +4,23 @@ import java.time.LocalDate;
 
 /** A task that must be completed by a specified time. */
 public class Deadline extends Task {
-    protected final LocalDate by;
+    /** Date by which this task should be completed. */
+    protected final LocalDate submitBy;
 
     /**
-     * Creates a deadline task which contains a date to submit by
+     * Creates a deadline task with the specified description and due date.
      *
-     * @param description the description of the task
-     * @param submitBy the date to submit the task by
+     * @param description task description.
+     * @param submitBy date by which the task should be completed.
      */
     public Deadline(String description, LocalDate submitBy) {
         super(description);
-        this.by = submitBy;
+        this.submitBy = submitBy;
     }
 
     @Override
     public String toString() {
-        return String.format("[D]%s (by: %s)", super.toString(), by);
+        return String.format("[D]%s (by: %s)", super.toString(), submitBy);
     }
 
     /**
@@ -29,6 +30,6 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, description, by);
+        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, description, submitBy);
     }
 }
