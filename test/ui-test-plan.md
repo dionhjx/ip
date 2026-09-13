@@ -2,7 +2,7 @@
 
 ## Application
 
-- Main class: `chudgpt.ChudGPT`
+- Main class: `chudgpt.ChudGpt`
 - Source root: `src/main/java`
 - Resource root: `src/main/resources`
 - Java requirement: Java 25

@@ -5,6 +5,7 @@ import chudgpt.storage.Storage;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
 
+/** Finds all the tasks in the current task list that matches the provided keyword, and displays them */
 public class FindCommand extends Command {
     private String keyword;
 

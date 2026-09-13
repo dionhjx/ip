@@ -10,7 +10,7 @@ import chudgpt.ui.Ui;
 /**
  * The entry point for the ChudGPT chatbot application.
  */
-public class ChudGPT {
+public class ChudGpt {
     private final TaskList tasks;
     private final Parser parser;
     private final Ui ui;
@@ -22,7 +22,7 @@ public class ChudGPT {
      *
      * @param filePath path to the file used to load and save tasks.
      */
-    public ChudGPT(String filePath) {
+    public ChudGpt(String filePath) {
         ui = new Ui();
         storage = new Storage(filePath);
         parser = new Parser();
@@ -64,6 +64,6 @@ public class ChudGPT {
      * @param args command-line arguments, which are not used.
      */
     public static void main(String[] args) {
-        new ChudGPT("data/tasks.txt").run();
+        new ChudGpt("data/tasks.txt").run();
     }
 }

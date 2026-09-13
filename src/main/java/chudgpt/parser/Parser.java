@@ -9,6 +9,7 @@ import chudgpt.command.ChangeTaskStatusCommand;
 import chudgpt.command.Command;
 import chudgpt.command.DeleteTaskCommand;
 import chudgpt.command.ExitCommand;
+import chudgpt.command.FindCommand;
 import chudgpt.command.HiCommand;
 import chudgpt.command.ListCommand;
 import chudgpt.command.SaveCommand;
@@ -41,32 +42,20 @@ public class Parser {
             params = parts[1];
         }
 
-        switch (commandName) {
-            case "hi":
-                return new HiCommand();
-            case "bye":
-                return new ExitCommand();
-            case "list":
-                return new ListCommand();
-            case "save":
-                return new SaveCommand();
-            case "todo":
-                return new AddTaskCommand(new ToDo(params));
-            case "deadline":
-                return new AddTaskCommand(createDeadlineTask(params));
-            case "event":
-                return new AddTaskCommand(createEventTask(params));
-            case "delete":
-                return new DeleteTaskCommand(parseIndex(params));
-            case "mark":
-                return new ChangeTaskStatusCommand(parseIndex(params), true);
-            case "unmark":
-                return new ChangeTaskStatusCommand(parseIndex(params), false);
-            case ("find"):
-                return new FindCommand(params);
-            default:
-                throw new ChudException("Invalid command.");
-        }
+        return switch (commandName) {
+            case "hi" -> new HiCommand();
+            case "bye" -> new ExitCommand();
+            case "list" -> new ListCommand();
+            case "save" -> new SaveCommand();
+            case "todo" -> new AddTaskCommand(new ToDo(params));
+            case "deadline" -> new AddTaskCommand(createDeadlineTask(params));
+            case "event" -> new AddTaskCommand(createEventTask(params));
+            case "delete" -> new DeleteTaskCommand(parseIndex(params));
+            case "mark" -> new ChangeTaskStatusCommand(parseIndex(params), true);
+            case "unmark" -> new ChangeTaskStatusCommand(parseIndex(params), false);
+            case "find" -> new FindCommand(params);
+            default -> throw new ChudException("Invalid command.");
+        };
     }
 
     /**
