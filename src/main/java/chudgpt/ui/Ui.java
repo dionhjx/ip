@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
-import chudgpt.ChudGPT;
+import chudgpt.ChudGpt;
 import chudgpt.exception.ChudException;
 import chudgpt.task.Task;
 import chudgpt.task.TaskList;
@@ -33,7 +33,7 @@ public class Ui {
      */
     public void showLogo() throws ChudException {
         String logo;
-        try (InputStream logoStream = ChudGPT.class.getResourceAsStream("/logo.txt")) {
+        try (InputStream logoStream = ChudGpt.class.getResourceAsStream("/logo.txt")) {
             if (logoStream == null) {
                 throw new ChudException("Could not find logo.txt on the classpath.");
             }
@@ -112,8 +112,8 @@ public class Ui {
     public void showUpdateTaskMessage(Task task) {
         System.out.println(task.isCompleted()
                 ? "Nice! I've marked this task as completed!"
-                : "OK, I've marked this task as incomplete." + "\n  " +
-                task);
+                : "OK, I've marked this task as incomplete." + "\n  "
+                + task);
     }
 
     /** Displays the message showing updated task list size. */

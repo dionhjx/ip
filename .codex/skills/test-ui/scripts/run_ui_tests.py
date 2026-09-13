@@ -15,7 +15,7 @@ REPOSITORY_ROOT = Path(__file__).resolve().parents[4]
 PLAN_PATH = REPOSITORY_ROOT / "test" / "ui-test-plan.md"
 SOURCE_ROOT = REPOSITORY_ROOT / "src" / "main" / "java"
 RESOURCE_ROOT = REPOSITORY_ROOT / "src" / "main" / "resources"
-MAIN_CLASS = "chudgpt.ChudGPT"
+MAIN_CLASS = "chudgpt.ChudGpt"
 
 
 @dataclass(frozen=True)

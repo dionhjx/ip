@@ -53,10 +53,10 @@ public class TaskListTest {
     public void getTask_invalidIndex_exceptionThrown() {
         TaskList taskList = taskListOf(new ToDo("task"));
 
-        ChudException negativeIndexException = assertThrows(ChudException.class,
-                () -> taskList.getTask(-1));
-        ChudException indexAfterLastException = assertThrows(ChudException.class,
-                () -> taskList.getTask(taskList.size()));
+        ChudException negativeIndexException = assertThrows(ChudException.class, () ->
+                taskList.getTask(-1));
+        ChudException indexAfterLastException = assertThrows(ChudException.class, () ->
+                taskList.getTask(taskList.size()));
 
         assertEquals("Index out of bounds", negativeIndexException.getMessage());
         assertEquals("Index out of bounds", indexAfterLastException.getMessage());
@@ -82,10 +82,10 @@ public class TaskListTest {
     public void updateTask_invalidIndex_exceptionThrown() {
         TaskList taskList = taskListOf(new ToDo("task"));
 
-        ChudException negativeIndexException = assertThrows(ChudException.class,
-                () -> taskList.updateTask(-1, true));
-        ChudException indexAfterLastException = assertThrows(ChudException.class,
-                () -> taskList.updateTask(taskList.size(), true));
+        ChudException negativeIndexException = assertThrows(ChudException.class, () ->
+                taskList.updateTask(-1, true));
+        ChudException indexAfterLastException = assertThrows(ChudException.class, () ->
+                taskList.updateTask(taskList.size(), true));
 
         assertEquals("Index out of bounds.", negativeIndexException.getMessage());
         assertEquals("Index out of bounds.", indexAfterLastException.getMessage());
@@ -136,8 +136,8 @@ public class TaskListTest {
     public void deleteTask_emptyList_exceptionThrown() {
         TaskList taskList = new TaskList();
 
-        ChudException exception = assertThrows(ChudException.class,
-                () -> taskList.deleteTask(0));
+        ChudException exception = assertThrows(ChudException.class, () ->
+                taskList.deleteTask(0));
 
         assertEquals("Index out of bounds", exception.getMessage());
         assertEquals(0, taskList.size());
@@ -148,8 +148,8 @@ public class TaskListTest {
         ToDo task = new ToDo("task");
         TaskList taskList = taskListOf(task);
 
-        ChudException exception = assertThrows(ChudException.class,
-                () -> taskList.deleteTask(-1));
+        ChudException exception = assertThrows(ChudException.class, () ->
+                taskList.deleteTask(-1));
 
         assertEquals("Index out of bounds", exception.getMessage());
         assertEquals(1, taskList.size());
@@ -161,8 +161,8 @@ public class TaskListTest {
         ToDo task = new ToDo("task");
         TaskList taskList = taskListOf(task);
 
-        ChudException exception = assertThrows(ChudException.class,
-                () -> taskList.deleteTask(taskList.size()));
+        ChudException exception = assertThrows(ChudException.class, () ->
+                taskList.deleteTask(taskList.size()));
 
         assertEquals("Index out of bounds", exception.getMessage());
         assertEquals(1, taskList.size());

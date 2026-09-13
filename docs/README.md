@@ -4,7 +4,7 @@ ChudGPT is a command-line chatbot that supports ToDos, deadlines, and events, le
 
 ## Starting ChudGPT
 
-Run `chudgpt.ChudGPT.main()` from `src/main/java/chudgpt/ChudGPT.java`. ChudGPT displays its banner and asks what it can do for the user.
+Run `chudgpt.ChudGpt.main()` from `src/main/java/chudgpt/ChudGPT.java`. ChudGPT displays its banner and asks what it can do for the user.
 
 When it starts, ChudGPT loads tasks from `data/save.txt`. On the first run, the file and its `data` folder may not exist; ChudGPT starts with an empty task list. The folder and file are created automatically when the first task-list change is saved.
 

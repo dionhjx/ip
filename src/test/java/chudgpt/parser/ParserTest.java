@@ -77,7 +77,7 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_deadlineCommand_validInput_deadlineReturnedWithParsedValues() throws ChudException {
+    public void parseDeadlineCommand_validInput_deadlineReturnedWithParsedValues() throws ChudException {
         Task task = parseTaskCommand("deadline return book /by 2026-09-09");
 
         Deadline deadline = assertInstanceOf(Deadline.class, task);
@@ -85,23 +85,23 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_deadlineCommand_missingByArgument_exceptionThrown() {
-        assertChudException("OOPS!!! There must be a /by argument passed in.",
-                () -> parser.parse("deadline return book"));
+    public void parseDeadlineCommand_missingByArgument_exceptionThrown() {
+        assertChudException("OOPS!!! There must be a /by argument passed in.", () ->
+                parser.parse("deadline return book"));
     }
 
     @Test
-    public void parse_deadlineCommand_emptyDescriptionOrDate_exceptionThrown() {
+    public void parseDeadlineCommand_emptyDescriptionOrDate_exceptionThrown() {
         String expectedMessage = "OOPS!!! The description of a deadline cannot be empty";
 
-        assertChudException(expectedMessage,
-                () -> parser.parse("deadline  /by 2026-09-09"));
-        assertChudException(expectedMessage,
-                () -> parser.parse("deadline return book /by "));
+        assertChudException(expectedMessage, () ->
+                parser.parse("deadline  /by 2026-09-09"));
+        assertChudException(expectedMessage, () ->
+                parser.parse("deadline return book /by "));
     }
 
     @Test
-    public void parse_eventCommand_validInput_eventReturnedWithParsedValues() throws ChudException {
+    public void parseEventCommand_validInput_eventReturnedWithParsedValues() throws ChudException {
         Task task = parseTaskCommand("event project meeting /from 2026-09-09 /to 2026-09-10");
 
         Event event = assertInstanceOf(Event.class, task);
@@ -110,29 +110,29 @@ public class ParserTest {
     }
 
     @Test
-    public void parse_eventCommand_missingOrMisorderedArguments_exceptionThrown() {
+    public void parseEventCommand_missingOrMisorderedArguments_exceptionThrown() {
         String expectedMessage = "OOPS!!! Specify the /from argument before the /to argument";
 
-        assertChudException(expectedMessage,
-                () -> parser.parse("event project meeting"));
-        assertChudException(expectedMessage,
-                () -> parser.parse("event project meeting /from 2026-09-09"));
-        assertChudException(expectedMessage,
-                () -> parser.parse("event project meeting /to 2026-09-10 /from 2026-09-09"));
+        assertChudException(expectedMessage, () ->
+                parser.parse("event project meeting"));
+        assertChudException(expectedMessage, () ->
+                parser.parse("event project meeting /from 2026-09-09"));
+        assertChudException(expectedMessage, () ->
+                parser.parse("event project meeting /to 2026-09-10 /from 2026-09-09"));
     }
 
     @Test
-    public void parse_eventCommand_emptyDescriptionOrDate_exceptionThrown() {
+    public void parseEventCommand_emptyDescriptionOrDate_exceptionThrown() {
         String expectedMessage = """
                 OOPS!!! The description, start and end date of an event cannot be empty
                 """;
 
-        assertChudException(expectedMessage,
-                () -> parser.parse("event  /from 2026-09-09 /to 2026-09-10"));
-        assertChudException(expectedMessage,
-                () -> parser.parse("event project meeting /from /to 2026-09-10"));
-        assertChudException(expectedMessage,
-                () -> parser.parse("event project meeting /from 2026-09-09 /to "));
+        assertChudException(expectedMessage, () ->
+                parser.parse("event  /from 2026-09-09 /to 2026-09-10"));
+        assertChudException(expectedMessage, () ->
+                parser.parse("event project meeting /from /to 2026-09-10"));
+        assertChudException(expectedMessage, () ->
+                parser.parse("event project meeting /from 2026-09-09 /to "));
     }
 
     @Test
