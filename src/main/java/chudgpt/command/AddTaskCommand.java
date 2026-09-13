@@ -19,16 +19,17 @@ public class AddTaskCommand extends Command {
     }
 
     /**
-     * Adds the task, saves the updated task list, and displays a confirmation message.
+     * Adds the task, saves the updated task list, and returns a confirmation message.
      *
      * @param tasks the current task list
-     * @param ui the UI handler used to display the confirmation
+     * @param ui the UI handler used to create the confirmation
      * @param storage the storage handler used to save the updated list
+     * @return the response confirming that the task was added
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
+    public String execute(TaskList tasks, Ui ui, Storage storage) {
         tasks.addTask(taskToAdd);
         storage.save(tasks);
-        ui.showAddTaskMessage(taskToAdd, tasks.size());
+        return ui.getTaskAddedMessage(taskToAdd, tasks.size());
     }
 }

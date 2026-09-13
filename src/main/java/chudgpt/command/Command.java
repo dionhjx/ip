@@ -23,7 +23,8 @@ public abstract class Command {
      * @param tasks current task list.
      * @param ui application user interface.
      * @param storage application task storage.
+     * @return the response to display after executing the command.
      * @throws ChudException if command execution fails due to invalid task data.
      */
-    public abstract void execute(TaskList tasks, Ui ui, Storage storage) throws ChudException;
+    public abstract String execute(TaskList tasks, Ui ui, Storage storage) throws ChudException;
 }

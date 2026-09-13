@@ -10,147 +10,177 @@ import chudgpt.exception.ChudException;
 import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 
-/** Handles console input and output for the ChudGPT application. */
+/** Creates application messages and handles console input and output. */
 public class Ui {
     private final Scanner input = new Scanner(System.in);
 
-    /** Shows the welcome message. */
-    public void showWelcomeMessage() {
-        showLine();
+    /**
+     * Returns the welcome message.
+     *
+     * @return the welcome message.
+     */
+    public String getWelcomeMessage() {
+        String logo;
         try {
-            showLogo();
+            logo = getLogo();
         } catch (ChudException e) {
-            System.out.println("OOPS!!! I can't find the logo :( I'm such a chud...");
+            logo = "OOPS!!! I can't find the logo :( I'm such a chud...";
         }
-        System.out.println("Hello! I'm ChudGPT.\nWhat can I do for you?");
-        showLine();
+        return getDivider() + "\n" + logo + "\nHello! I'm ChudGPT.\nWhat can I do for you?\n" + getDivider();
     }
 
     /**
-     * Displays the ChudGPT logo.
+     * Returns the ChudGPT logo.
      *
+     * @return the ChudGPT logo.
      * @throws ChudException if the logo resource cannot be read.
      */
-    public void showLogo() throws ChudException {
-        String logo;
+    public String getLogo() throws ChudException {
         try (InputStream logoStream = ChudGpt.class.getResourceAsStream("/logo.txt")) {
             if (logoStream == null) {
                 throw new ChudException("Could not find logo.txt on the classpath.");
             }
-            logo = new String(logoStream.readAllBytes(), StandardCharsets.UTF_8);
+            return new String(logoStream.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             throw new ChudException(e.getMessage());
         }
-
-        System.out.println(logo);
     }
 
     /**
-     * Lists the current tasks.
+     * Returns a message listing the current tasks.
      *
-     * @param tasks the current tasks in your list.
+     * @param tasks the current tasks in the list.
+     * @return the task-list message.
      */
-    public void listTasks(TaskList tasks) {
+    public String getTaskListMessage(TaskList tasks) {
         if (tasks.size() == 0) {
-            System.out.println("You have no tasks in your list! Try adding some");
-            return;
+            return "You have no tasks in your list! Try adding some";
         }
-        System.out.println("Here are the tasks in your list:\n" + tasks);
+        return "Here are the tasks in your list:\n" + tasks;
     }
 
     /**
-     * Lists the matched tasks.
+     * Returns a message listing the matched tasks.
      *
      * @param matches the matched tasks that were found.
+     * @return the matched-task message.
      */
-    public void listMatches(TaskList matches) {
+    public String getMatchesMessage(TaskList matches) {
         if (matches.size() == 0) {
-            System.out.println("I couldn't find any tasks that contains that keyword.");
-            return;
+            return "I couldn't find any tasks that contains that keyword.";
         }
-
-        System.out.println("Here are the matching tasks in your list:\n" + matches);
-    }
-
-    /** Displays the greeting message. */
-    public void showHiMessage() {
-        System.out.println("Hi! I'm ChudGPT. How can I help you?");
-    }
-
-    /** Displays the goodbye message. */
-    public void showByeMessage() {
-        System.out.println("Bye. Hope to see you again soon!");
+        return "Here are the matching tasks in your list:\n" + matches;
     }
 
     /**
-     * Displays the message after adding a task.
+     * Returns the greeting message.
+     *
+     * @return the greeting message.
+     */
+    public String getGreetingMessage() {
+        return "Hi! I'm ChudGPT. How can I help you?";
+    }
+
+    /**
+     * Returns the goodbye message.
+     *
+     * @return the goodbye message.
+     */
+    public String getGoodbyeMessage() {
+        return "Bye. Hope to see you again soon!";
+    }
+
+    /**
+     * Returns the message shown after adding a task.
      *
      * @param task the task that was added.
      * @param size the updated size of the task list.
+     * @return the task-added message.
      */
-    public void showAddTaskMessage(Task task, int size) {
-        System.out.println("Got it. I've added this task:\n  " + task);
-        showListSizeMessage(size);
+    public String getTaskAddedMessage(Task task, int size) {
+        return "Got it. I've added this task:\n  " + task + "\n" + getListSizeMessage(size);
     }
 
     /**
-     * Displays the message after deleting a task.
+     * Returns the message shown after deleting a task.
      *
      * @param task the task that was deleted.
      * @param size the updated size of the task list.
+     * @return the task-deleted message.
      */
-    public void showDeleteTaskMessage(Task task, int size) {
-        System.out.println("Got it. Noted. I've removed this task:\n  " + task);
-        showListSizeMessage(size);
+    public String getTaskDeletedMessage(Task task, int size) {
+        return "Got it. Noted. I've removed this task:\n  " + task + "\n" + getListSizeMessage(size);
     }
 
     /**
-     * Displays the message after changing a task's completion status.
+     * Returns the message shown after changing a task's completion status.
      *
-     * @param task task whose status was changed.
+     * @param task the task whose status was changed.
+     * @return the task-status message.
      */
-    public void showUpdateTaskMessage(Task task) {
-        System.out.println(task.isCompleted()
+    public String getTaskStatusMessage(Task task) {
+        return task.isCompleted()
                 ? "Nice! I've marked this task as completed!"
-                : "OK, I've marked this task as incomplete." + "\n  "
-                + task);
+                : "OK, I've marked this task as incomplete.\n  " + task;
     }
 
-    /** Displays the message showing updated task list size. */
-    private void showListSizeMessage(int size) {
-        System.out.println("Now you have " + size + " tasks in your list.");
-    }
-
-    /** Displays the save message. */
-    public void showSaveMessage() {
-        System.out.println("I've saved your current list of tasks.");
+    /** Returns the message showing the updated task-list size. */
+    private String getListSizeMessage(int size) {
+        return "Now you have " + size + " tasks in your list.";
     }
 
     /**
-     * Displays an error message.
+     * Returns the save message.
      *
-     * @param errMessage the message associated with the error.
+     * @return the save message.
      */
-    public void showErrorMessage(String errMessage) {
-        System.out.println("OOPS!!! I've run into an error :( I'm such a chud...\nDetails:\n  " + errMessage);
+    public String getSaveMessage() {
+        return "I've saved your current list of tasks.";
+    }
+
+    /**
+     * Returns an error message.
+     *
+     * @param errorMessage the message associated with the error.
+     * @return the formatted error message.
+     */
+    public String getErrorMessage(String errorMessage) {
+        return "OOPS!!! I've run into an error :( I'm such a chud...\nDetails:\n  " + errorMessage;
     }
 
     /**
      * Reads the next command from standard input.
      *
-     * @return next command entered by the user.
+     * @return the next command entered by the user.
      */
     public String readCommand() {
         return input.nextLine();
     }
 
-    /** Shows the divider line. */
-    public void showLine() {
-        System.out.println("____________________________________________________________");
+    /**
+     * Returns the divider line.
+     *
+     * @return the divider line.
+     */
+    public String getDivider() {
+        return "____________________________________________________________";
     }
 
-    /** Shows the error message when unable to load the save file. */
-    public void showLoadError() {
-        System.out.println("OOPS!!! I couldn't retrieve the save file :( I'm such a chud...");
+    /**
+     * Returns the error message shown when the save file cannot be loaded.
+     *
+     * @return the save-file loading error message.
+     */
+    public String getLoadErrorMessage() {
+        return "OOPS!!! I couldn't retrieve the save file :( I'm such a chud...";
+    }
+
+    /**
+     * Displays a message in the console.
+     *
+     * @param message the message to display.
+     */
+    public void display(String message) {
+        System.out.println(message);
     }
 }

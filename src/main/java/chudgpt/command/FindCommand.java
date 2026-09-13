@@ -14,12 +14,12 @@ public class FindCommand extends Command {
     }
 
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) throws ChudException {
+    public String execute(TaskList tasks, Ui ui, Storage storage) throws ChudException {
         if (keyword.isBlank()) {
             throw new ChudException("Please enter a keyword to search for");
         }
 
         TaskList matches = tasks.findTasks(keyword);
-        ui.listMatches(matches);
+        return ui.getMatchesMessage(matches);
     }
 }

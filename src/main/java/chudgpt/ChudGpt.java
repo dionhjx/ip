@@ -16,6 +16,7 @@ public class ChudGpt {
     private final Ui ui;
     /** Relative location of the task data, kept portable across operating systems. */
     private final Storage storage;
+    private boolean hasExited;
 
     /**
      * Creates a ChudGPT application backed by the specified data file.
@@ -31,7 +32,7 @@ public class ChudGpt {
         try {
             loadedTasks = new TaskList(storage.load());
         } catch (ChudException e) {
-            ui.showLoadError();
+            ui.display(ui.getLoadErrorMessage());
             loadedTasks = new TaskList();
         }
 
@@ -40,22 +41,68 @@ public class ChudGpt {
 
     /** Runs the command-line application. */
     public void run() {
-        ui.showWelcomeMessage();
+        ui.display(ui.getWelcomeMessage());
 
         boolean isExit = false;
         while (!isExit) {
-            try {
-                String command = ui.readCommand();
-                ui.showLine();
-                Command c = parser.parse(command);
-                c.execute(tasks, ui, storage);
-                isExit = c.isExit();
-            } catch (ChudException e) {
-                ui.showErrorMessage(e.getMessage());
-            } finally {
-                ui.showLine();
-            }
+            String input = ui.readCommand();
+            ui.display(ui.getDivider());
+            CommandResult result = executeCommand(input);
+            updateExitStatus(result);
+            ui.display(result.response());
+            ui.display(ui.getDivider());
+            isExit = hasExited;
         }
+    }
+
+    /**
+     * Returns ChudGPT's response to one user command.
+     *
+     * @param input the command entered by the user.
+     * @return ChudGPT's response.
+     */
+    public String getResponse(String input) {
+        CommandResult result = executeCommand(input);
+        updateExitStatus(result);
+        return result.response();
+    }
+
+    /**
+     * Returns whether ChudGPT has received an exit command.
+     *
+     * @return {@code true} if ChudGPT has received an exit command.
+     */
+    public boolean hasExited() {
+        return hasExited;
+    }
+
+    /**
+     * Returns ChudGPT's welcome message.
+     *
+     * @return ChudGPT's welcome message.
+     */
+    public String getWelcomeMessage() {
+        return ui.getWelcomeMessage();
+    }
+
+    /** Executes one command and returns its response and exit status. */
+    private CommandResult executeCommand(String input) {
+        try {
+            Command command = parser.parse(input);
+            String response = command.execute(tasks, ui, storage);
+            return new CommandResult(response, command.isExit());
+        } catch (ChudException e) {
+            return new CommandResult(ui.getErrorMessage(e.getMessage()), false);
+        }
+    }
+
+    /** Updates the application exit status from a command result. */
+    private void updateExitStatus(CommandResult result) {
+        hasExited = hasExited || result.isExit();
+    }
+
+    /** Stores the outcome of executing one command. */
+    private record CommandResult(String response, boolean isExit) {
     }
 
     /**

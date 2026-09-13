@@ -8,16 +8,17 @@ import chudgpt.ui.Ui;
 /** Saves the current task list. */
 public class SaveCommand extends Command {
     /**
-     * Saves the current task list and displays a confirmation message.
+     * Saves the current task list and returns a confirmation message.
      *
      * @param tasks the current task list to save
-     * @param ui the UI handler used to display the confirmation
+     * @param ui the UI handler used to create the confirmation
      * @param storage the storage handler used to save the task list
+     * @return the response confirming that the tasks were saved
      * @throws ChudException if the task list cannot be saved
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) throws ChudException {
+    public String execute(TaskList tasks, Ui ui, Storage storage) throws ChudException {
         storage.save(tasks);
-        ui.showSaveMessage();
+        return ui.getSaveMessage();
     }
 }
