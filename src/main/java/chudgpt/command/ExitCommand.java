@@ -12,15 +12,16 @@ public class ExitCommand extends Command {
     }
 
     /**
-     * Saves the current task list and displays the exit message.
+     * Saves the current task list and returns the exit message.
      *
      * @param tasks the current task list
-     * @param ui the UI handler used to display the exit message
+     * @param ui the UI handler used to create the exit message
      * @param storage the storage handler used to save the task list
+     * @return the goodbye response
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) {
+    public String execute(TaskList tasks, Ui ui, Storage storage) {
         storage.save(tasks);
-        ui.showByeMessage();
+        return ui.getGoodbyeMessage();
     }
 }

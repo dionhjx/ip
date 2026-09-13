@@ -23,17 +23,18 @@ public class ChangeTaskStatusCommand extends Command {
     }
 
     /**
-     * Updates the task status, displays the updated task, and saves the task list.
+     * Updates the task status, saves the task list, and returns a confirmation message.
      *
      * @param tasks the current task list
-     * @param ui the UI handler used to display the updated task
+     * @param ui the UI handler used to create the confirmation
      * @param storage the storage handler used to save the updated list
+     * @return the response confirming the task's new status
      * @throws ChudException if the task index is invalid
      */
     @Override
-    public void execute(TaskList tasks, Ui ui, Storage storage) throws ChudException {
+    public String execute(TaskList tasks, Ui ui, Storage storage) throws ChudException {
         Task updatedTask = tasks.updateTask(taskIndex, isCompleted);
-        ui.showUpdateTaskMessage(updatedTask);
         storage.save(tasks);
+        return ui.getTaskStatusMessage(updatedTask);
     }
 }

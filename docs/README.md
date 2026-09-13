@@ -8,6 +8,15 @@ Run `chudgpt.ChudGpt.main()` from `src/main/java/chudgpt/ChudGPT.java`. ChudGPT 
 
 When it starts, ChudGPT loads tasks from `data/save.txt`. On the first run, the file and its `data` folder may not exist; ChudGPT starts with an empty task list. The folder and file are created automatically when the first task-list change is saved.
 
+## Using the graphical interface
+
+Run `chudgpt.Launcher.main()` to start the JavaFX interface. ChudGPT's welcome message appears when the window
+opens. Enter one command in the text field and press the send button. The interface displays the user's command and
+the response returned by `ChudGpt.getResponse(String)` as dialog boxes. The graphical and command-line interfaces
+share the same parser, commands, task list, and storage.
+
+Entering `bye` displays ChudGPT's goodbye message and disables the graphical interface's text field and send button.
+
 ## Saying Hi
 
 Enter `hi` to say hi to ChudGPT!
