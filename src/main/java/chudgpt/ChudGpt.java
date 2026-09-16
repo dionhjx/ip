@@ -89,7 +89,10 @@ public class ChudGpt {
     private CommandResult executeCommand(String input) {
         try {
             Command command = parser.parse(input);
+            assert command != null : "Parser should return a command for valid input";
+
             String response = command.execute(tasks, ui, storage);
+            assert response != null : "Commands should return a response";
             return new CommandResult(response, command.isExit());
         } catch (ChudException e) {
             return new CommandResult(ui.getErrorMessage(e.getMessage()), false);
@@ -98,6 +101,7 @@ public class ChudGpt {
 
     /** Updates the application exit status from a command result. */
     private void updateExitStatus(CommandResult result) {
+        assert result != null : "Command result should not be null";
         hasExited = hasExited || result.isExit();
     }
 
