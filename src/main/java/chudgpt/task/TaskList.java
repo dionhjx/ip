@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import chudgpt.exception.ChudException;
 
@@ -94,14 +95,14 @@ public class TaskList {
     /**
      * Finds all tasks whose descriptions have the keyword
      *
-     * @param keyword the keyword to search for
-     * @return
+     * @param keyword the keyword to search for.
+     * @return a new Task List that contains tasks that match the keyword.
      */
     public TaskList findTasks(String keyword) {
         List<Task> matches = tasks.stream().filter(task -> task.description
                 .toLowerCase(Locale.ROOT)
                 .contains(keyword.toLowerCase(Locale.ROOT)))
-                .collect(Collectors.toList());
+                .toList();
         return new TaskList(matches);
     }
 
@@ -114,20 +115,13 @@ public class TaskList {
     public String toFileFormat() {
         return tasks.stream()
                 .map(Task::toSaveMessage)
-                .reduce("", (a, b) -> a + System.lineSeparator() + b);
+                .collect(Collectors.joining(System.lineSeparator()));
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-
-        for (int i = 0; i < tasks.size(); i++) {
-            if (i > 0) {
-                sb.append("\n");
-            }
-            sb.append(i + 1).append(". ").append(tasks.get(i));
-        }
-
-        return sb.toString();
+        return IntStream.range(0, tasks.size())
+                .mapToObj(index -> (index + 1) + ". " + tasks.get(index))
+                .collect(Collectors.joining("\n"));
     }
 }
