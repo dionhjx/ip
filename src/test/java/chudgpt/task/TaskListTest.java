@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -37,6 +38,26 @@ public class TaskListTest {
 
         assertEquals(1, sourceTasks.size());
         assertEquals(2, taskList.size());
+    }
+
+    @Test
+    public void constructor_nullTaskList_assertionErrorThrown() {
+        assertThrows(AssertionError.class, () -> new TaskList(null));
+    }
+
+    @Test
+    public void constructor_taskListContainingNull_assertionErrorThrown() {
+        List<Task> sourceTasks = new ArrayList<>();
+        sourceTasks.add(null);
+
+        assertThrows(AssertionError.class, () -> new TaskList(sourceTasks));
+    }
+
+    @Test
+    public void addTask_nullTask_assertionErrorThrown() {
+        TaskList taskList = new TaskList();
+
+        assertThrows(AssertionError.class, () -> taskList.addTask(null));
     }
 
     @Test

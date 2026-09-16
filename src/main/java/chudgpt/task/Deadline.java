@@ -15,6 +15,7 @@ public class Deadline extends Task {
      */
     public Deadline(String description, LocalDate submitBy) {
         super(description);
+        assert submitBy != null : "Deadline date should not be null";
         this.submitBy = submitBy;
     }
 

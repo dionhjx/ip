@@ -36,6 +36,7 @@ public class MainWindow extends AnchorPane {
      * @param chud application instance used to process GUI commands.
      */
     public void setChud(ChudGpt chud) {
+        assert chud != null : "Main window should receive an application instance";
         chudGpt = chud;
         dialogContainer.getChildren().add(DialogBox.getDukeDialog(chudGpt.getWelcomeMessage(), dukeImage));
     }
@@ -46,6 +47,7 @@ public class MainWindow extends AnchorPane {
      */
     @FXML
     private void handleUserInput() {
+        assert chudGpt != null : "Application should be set before handling input";
         String input = userInput.getText();
         String response = chudGpt.getResponse(input);
         dialogContainer.getChildren().addAll(
