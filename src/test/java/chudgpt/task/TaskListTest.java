@@ -198,8 +198,7 @@ public class TaskListTest {
         TaskList taskList = taskListOf(new ToDo("unfinished"),
                 new ToDo("finished").setCompleted(true));
 
-        String expected = System.lineSeparator()
-                + "T | 0 | unfinished"
+        String expected = "T | 0 | unfinished"
                 + System.lineSeparator()
                 + "T | 1 | finished";
 
