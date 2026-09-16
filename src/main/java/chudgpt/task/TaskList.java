@@ -9,6 +9,9 @@ import chudgpt.exception.ChudException;
 
 /** Stores tasks in their display and serialization order. */
 public class TaskList {
+    private static final String INDEX_OUT_OF_BOUNDS_MESSAGE = "Index out of bounds";
+    private static final String UPDATE_INDEX_OUT_OF_BOUNDS_MESSAGE = "Index out of bounds.";
+
     private final List<Task> tasks;
 
     /** Creates an empty task list. */
@@ -51,14 +54,13 @@ public class TaskList {
      * @throws ChudException if the index is out of range
      */
     public Task deleteTask(int index) throws ChudException {
-        if (index < 0 || index >= tasks.size()) {
-            throw new ChudException("Index out of bounds");
-        }
+        validateIndex(index, INDEX_OUT_OF_BOUNDS_MESSAGE);
 
         int previousSize = tasks.size();
         Task deletedTask = tasks.remove(index);
         assert deletedTask != null : "Deleted task should not be null";
         assert tasks.size() == previousSize - 1 : "Deleting a task should decrease the list size by one";
+
         return deletedTask;
     }
 
@@ -70,10 +72,7 @@ public class TaskList {
      * @throws ChudException if the index is out of range
      */
     public Task getTask(int index) throws ChudException {
-        if (index < 0 || index >= tasks.size()) {
-            throw new ChudException("Index out of bounds");
-        }
-
+        validateIndex(index, INDEX_OUT_OF_BOUNDS_MESSAGE);
         return tasks.get(index);
     }
 
@@ -86,6 +85,7 @@ public class TaskList {
      * @throws ChudException if the index is out of range.
      */
     public Task updateTask(int index, boolean isCompleted) throws ChudException {
+        validateIndex(index, UPDATE_INDEX_OUT_OF_BOUNDS_MESSAGE);
         if (index < 0 || index >= tasks.size()) {
             throw new ChudException("Index out of bounds.");
         }
@@ -93,6 +93,13 @@ public class TaskList {
         Task updatedTask = tasks.get(index).setCompleted(isCompleted);
         assert updatedTask.isCompleted() == isCompleted : "Updated task should have the requested status";
         return updatedTask;
+    }
+
+    /** Ensures that an index identifies a task currently in the list. */
+    private void validateIndex(int index, String errorMessage) throws ChudException {
+        if (index < 0 || index >= tasks.size()) {
+            throw new ChudException(errorMessage);
+        }
     }
 
     /**
