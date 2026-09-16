@@ -81,28 +81,57 @@ public class Storage {
             return null;
         }
 
-        boolean isCompleted;
-        if (parts[1].equals("0")) {
-            isCompleted = false;
-        } else if (parts[1].equals("1")) {
-            isCompleted = true;
-        } else {
+        Boolean isCompleted = parseCompletionStatus(parts[1]);
+        if (isCompleted == null) {
             return null;
         }
 
-        Task task;
-        if (parts[0].equals("T") && parts.length == 3 && !parts[2].isBlank()) {
-            task = new ToDo(parts[2]);
-        } else if (parts[0].equals("D") && parts.length == 4
-                && !parts[2].isBlank() && !parts[3].isBlank()) {
-            task = new Deadline(parts[2], Parser.parseDate(parts[3]));
-        } else if (parts[0].equals("E") && parts.length == 5
-                && !parts[2].isBlank() && !parts[3].isBlank() && !parts[4].isBlank()) {
-            task = new Event(parts[2], Parser.parseDate(parts[3]), Parser.parseDate(parts[4]));
-        } else {
+        Task task = createTask(parts);
+        if (task == null) {
             return null;
         }
+
         task.setCompleted(isCompleted);
         return task;
+    }
+
+    /** Returns the completion status represented by a saved value, or {@code null} if invalid. */
+    private Boolean parseCompletionStatus(String value) {
+        return switch (value) {
+            case "0" -> false;
+            case "1" -> true;
+            default -> null;
+        };
+    }
+
+    /** Returns the task represented by the saved fields, or {@code null} if malformed. */
+    private Task createTask(String[] parts) throws ChudException {
+        return switch (parts[0]) {
+            case "T" -> createToDo(parts);
+            case "D" -> createDeadline(parts);
+            case "E" -> createEvent(parts);
+            default -> null;
+        };
+    }
+
+    /** Returns a to-do task when its saved fields are valid. */
+    private Task createToDo(String[] parts) {
+        return parts.length == 3 && !parts[2].isBlank()
+                ? new ToDo(parts[2])
+                : null;
+    }
+
+    /** Returns a deadline task when its saved fields are valid. */
+    private Task createDeadline(String[] parts) throws ChudException {
+        return parts.length == 4 && !parts[2].isBlank() && !parts[3].isBlank()
+                ? new Deadline(parts[2], Parser.parseDate(parts[3]))
+                : null;
+    }
+
+    /** Returns an event task when its saved fields are valid. */
+    private Task createEvent(String[] parts) throws ChudException {
+        return parts.length == 5 && !parts[2].isBlank() && !parts[3].isBlank() && !parts[4].isBlank()
+                ? new Event(parts[2], Parser.parseDate(parts[3]), Parser.parseDate(parts[4]))
+                : null;
     }
 }
