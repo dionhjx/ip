@@ -23,6 +23,9 @@ public class TaskList {
      * @param tasks tasks to copy into the list.
      */
     public TaskList(List<Task> tasks) {
+        assert tasks != null : "Source task list should not be null";
+        assert tasks.stream().allMatch(task -> task != null)
+                : "Source task list should not contain null tasks";
         this.tasks = new ArrayList<>(tasks);
     }
 
@@ -33,7 +36,11 @@ public class TaskList {
      * @return the task that was added
      */
     public Task addTask(Task task) {
+        assert task != null : "Task to add should not be null";
+        int previousSize = tasks.size();
+
         tasks.add(task);
+        assert tasks.size() == previousSize + 1 : "Adding a task should increase the list size by one";
         return task;
     }
 
@@ -49,7 +56,11 @@ public class TaskList {
             throw new ChudException("Index out of bounds");
         }
 
-        return tasks.remove(index);
+        int previousSize = tasks.size();
+        Task deletedTask = tasks.remove(index);
+        assert deletedTask != null : "Deleted task should not be null";
+        assert tasks.size() == previousSize - 1 : "Deleting a task should decrease the list size by one";
+        return deletedTask;
     }
 
     /**
@@ -80,7 +91,9 @@ public class TaskList {
             throw new ChudException("Index out of bounds.");
         }
 
-        return tasks.get(index).setCompleted(isCompleted);
+        Task updatedTask = tasks.get(index).setCompleted(isCompleted);
+        assert updatedTask.isCompleted() == isCompleted : "Updated task should have the requested status";
+        return updatedTask;
     }
 
     /**
@@ -99,6 +112,7 @@ public class TaskList {
      * @return a new Task List that contains tasks that match the keyword.
      */
     public TaskList findTasks(String keyword) {
+        assert keyword != null : "Search keyword should not be null";
         List<Task> matches = tasks.stream().filter(task -> task.description
                 .toLowerCase(Locale.ROOT)
                 .contains(keyword.toLowerCase(Locale.ROOT)))

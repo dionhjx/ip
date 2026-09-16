@@ -25,6 +25,8 @@ public class Storage {
      * @param filePath the file path used to store tasks.
      */
     public Storage(String filePath) {
+        assert filePath != null : "Save file path should not be null";
+        assert !filePath.isBlank() : "Save file path should not be blank";
         this.saveFile = Path.of(filePath);
     }
 
@@ -102,6 +104,7 @@ public class Storage {
         } else {
             return null;
         }
+        assert task != null : "A recognized saved record should produce a task";
         task.setCompleted(isCompleted);
         return task;
     }

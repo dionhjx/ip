@@ -9,6 +9,7 @@ public abstract class Task {
     protected final String description;
 
     protected Task(String description) {
+        assert description != null : "Task description should not be null";
         this.description = description;
         isCompleted = false;
     }
