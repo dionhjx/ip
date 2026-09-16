@@ -9,6 +9,9 @@ import chudgpt.exception.ChudException;
 
 /** Stores tasks in their display and serialization order. */
 public class TaskList {
+    private static final String INDEX_OUT_OF_BOUNDS_MESSAGE = "Index out of bounds";
+    private static final String UPDATE_INDEX_OUT_OF_BOUNDS_MESSAGE = "Index out of bounds.";
+
     private final List<Task> tasks;
 
     /** Creates an empty task list. */
@@ -44,10 +47,7 @@ public class TaskList {
      * @throws ChudException if the index is out of range
      */
     public Task deleteTask(int index) throws ChudException {
-        if (index < 0 || index >= tasks.size()) {
-            throw new ChudException("Index out of bounds");
-        }
-
+        validateIndex(index, INDEX_OUT_OF_BOUNDS_MESSAGE);
         return tasks.remove(index);
     }
 
@@ -59,10 +59,7 @@ public class TaskList {
      * @throws ChudException if the index is out of range
      */
     public Task getTask(int index) throws ChudException {
-        if (index < 0 || index >= tasks.size()) {
-            throw new ChudException("Index out of bounds");
-        }
-
+        validateIndex(index, INDEX_OUT_OF_BOUNDS_MESSAGE);
         return tasks.get(index);
     }
 
@@ -75,11 +72,15 @@ public class TaskList {
      * @throws ChudException if the index is out of range.
      */
     public Task updateTask(int index, boolean isCompleted) throws ChudException {
-        if (index < 0 || index >= tasks.size()) {
-            throw new ChudException("Index out of bounds.");
-        }
-
+        validateIndex(index, UPDATE_INDEX_OUT_OF_BOUNDS_MESSAGE);
         return tasks.get(index).setCompleted(isCompleted);
+    }
+
+    /** Ensures that an index identifies a task currently in the list. */
+    private void validateIndex(int index, String errorMessage) throws ChudException {
+        if (index < 0 || index >= tasks.size()) {
+            throw new ChudException(errorMessage);
+        }
     }
 
     /**

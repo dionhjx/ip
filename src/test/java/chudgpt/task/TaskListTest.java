@@ -80,7 +80,8 @@ public class TaskListTest {
 
     @Test
     public void updateTask_invalidIndex_exceptionThrown() {
-        TaskList taskList = taskListOf(new ToDo("task"));
+        ToDo task = new ToDo("task");
+        TaskList taskList = taskListOf(task);
 
         ChudException negativeIndexException = assertThrows(ChudException.class, () ->
                 taskList.updateTask(-1, true));
@@ -89,6 +90,8 @@ public class TaskListTest {
 
         assertEquals("Index out of bounds.", negativeIndexException.getMessage());
         assertEquals("Index out of bounds.", indexAfterLastException.getMessage());
+        assertFalse(task.isCompleted());
+        assertEquals(1, taskList.size());
     }
 
     @Test
