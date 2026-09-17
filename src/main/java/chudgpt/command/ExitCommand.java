@@ -1,5 +1,6 @@
 package chudgpt.command;
 
+import chudgpt.exception.ChudException;
 import chudgpt.storage.Storage;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
@@ -18,9 +19,10 @@ public class ExitCommand extends Command {
      * @param ui the UI handler used to create the exit message
      * @param storage the storage handler used to save the task list
      * @return the goodbye response
+     * @throws ChudException if the task list cannot be saved.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage) {
+    public String execute(TaskList tasks, Ui ui, Storage storage) throws ChudException {
         storage.save(tasks);
         return ui.getGoodbyeMessage();
     }

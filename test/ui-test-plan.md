@@ -12,8 +12,8 @@
 
 The original six scenarios have been reconciled with current implementation behavior: ISO dates,
 actual messages, a divider before every command, and explicit NONE priority labels.
-The former empty-ToDo validation expectation was stale; blank ToDos remain accepted and have a JUnit regression test.
-Case 5 checks actual blank-command validation instead.
+Blank ToDos are rejected, and commands consistently validate missing or unexpected arguments.
+Malformed save records are reported by line while valid records continue to load.
 
 ## JUnit acceptance coverage
 
@@ -23,11 +23,11 @@ Run `./gradlew test checkstyleMain checkstyleTest` with Java 25 (`.\gradlew.bat`
 | --- | --- |
 | Five keywords, case folding, exact seven-character padding | `PriorityTest` |
 | Default NONE, priority changes preserve task fields, null rejection, serialization | `TaskTest` |
-| Creation syntax, token boundaries, distinct errors, index syntax | `ParserTest` |
-| Stable sort, all levels, completion independence, empty/single/tied lists, unchanged backing order | `TaskListTest` |
+| Creation syntax, command shape, description safety, date ordering, index syntax | `ParserTest` |
+| Duplicate rejection, stable sort, completion independence, empty/single/tied lists | `TaskListTest` |
 | Description-only search with priority labels | `TaskListTest` |
 | New-format round trips, mixed records, legacy migration only on save, malformed priorities | `StorageTest` |
-| Invalid dates retain the existing loading failure | `StorageTest` |
+| Line-level recovery, duplicate records, backups, invalid dates, save failures | `StorageTest` |
 | Priority update/repeat/clear, persistence and rejected commands without file changes | `ChangeTaskPriorityCommandTest` |
 | Sorted view uses no storage and preserves normal-list numbering | `ListCommandTest` |
 | Sorted output followed by mark/priority/delete, restart, errors, invalid list arguments | `ChudGptTest` |
@@ -188,12 +188,12 @@ ____________________________________________________________
 ____________________________________________________________
 OOPS!!! I've run into an error :( I'm such a chud...
 Details:
-  Index out of bounds.
+  Task number 1 does not exist.
 ____________________________________________________________
 ____________________________________________________________
 OOPS!!! I've run into an error :( I'm such a chud...
 Details:
-  Index out of bounds.
+  Task number 1 does not exist.
 ____________________________________________________________
 ____________________________________________________________
 You have no tasks in your list! Try adding some
@@ -418,7 +418,7 @@ ____________________________________________________________
 ____________________________________________________________
 OOPS!!! I've run into an error :( I'm such a chud...
 Details:
-  Task number must be a number.
+  Task number must be a positive whole number.
 ____________________________________________________________
 ____________________________________________________________
 You have no tasks in your list! Try adding some
@@ -528,12 +528,106 @@ ____________________________________________________________
 Hello! I'm ChudGPT.
 What can I do for you?
 ____________________________________________________________
+WARNING: Some saved tasks could not be loaded.
+Details:
+  Line 3 was skipped: The priority value is invalid.
+  Line 4 was skipped: The priority value is invalid.
+  Line 5 was skipped: The priority value is invalid.
+A backup will be created before the recovered task list is saved.
 ____________________________________________________________
 Here are the tasks in your list:
 1. [T][ ][P:NONE   ] HIGH
 2. [T][ ][P:HIGH   ] new task
 3. [D][X][P:MEDIUM ] return book (by: 2026-10-01)
 4. [E][ ][P:LOW    ] meeting (from: 2026-10-01 to: 2026-10-02)
+____________________________________________________________
+____________________________________________________________
+Bye. Hope to see you again soon!
+____________________________________________________________
+```
+
+## Test Case 11: Expanded input validation
+
+Aim: Reject empty descriptions, malformed command shapes, unsafe descriptions, invalid task numbers,
+non-increasing event dates, and normalized duplicate tasks without changing the valid task list.
+
+Inputs:
+
+```text
+todo
+hi extra
+delete
+delete 0
+delete one
+event meeting /from 2026-10-01 /to 2026-10-01
+todo unsafe | description
+todo Read   Book
+todo read book /priority high
+list
+bye
+```
+
+Expected output:
+
+```text
+____________________________________________________________
+  ____ _               _  ____ ____ _____ 
+ / ___| |__  _   _  __| |/ ___|  _ \_   _|
+| |   | '_ \| | | |/ _` | |  _| |_) || |  
+| |___| | | | |_| | (_| | |_| |  __/ | |  
+ \____|_| |_|\__,_|\__,_|\____|_|    |_|  
+
+Hello! I'm ChudGPT.
+What can I do for you?
+____________________________________________________________
+____________________________________________________________
+OOPS!!! I've run into an error :( I'm such a chud...
+Details:
+  Task description cannot be empty.
+____________________________________________________________
+____________________________________________________________
+OOPS!!! I've run into an error :( I'm such a chud...
+Details:
+  Usage: hi.
+____________________________________________________________
+____________________________________________________________
+OOPS!!! I've run into an error :( I'm such a chud...
+Details:
+  Usage: delete <task number>.
+____________________________________________________________
+____________________________________________________________
+OOPS!!! I've run into an error :( I'm such a chud...
+Details:
+  Task numbers start from 1.
+____________________________________________________________
+____________________________________________________________
+OOPS!!! I've run into an error :( I'm such a chud...
+Details:
+  Task number must be a positive whole number.
+____________________________________________________________
+____________________________________________________________
+OOPS!!! I've run into an error :( I'm such a chud...
+Details:
+  Event end date must be later than its start date.
+____________________________________________________________
+____________________________________________________________
+OOPS!!! I've run into an error :( I'm such a chud...
+Details:
+  Task description cannot contain '|' or control characters.
+____________________________________________________________
+____________________________________________________________
+Got it. I've added this task:
+  [T][ ][P:NONE   ] read   book
+Now you have 1 tasks in your list.
+____________________________________________________________
+____________________________________________________________
+OOPS!!! I've run into an error :( I'm such a chud...
+Details:
+  This task duplicates task 1.
+____________________________________________________________
+____________________________________________________________
+Here are the tasks in your list:
+1. [T][ ][P:NONE   ] read   book
 ____________________________________________________________
 ____________________________________________________________
 Bye. Hope to see you again soon!

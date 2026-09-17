@@ -16,6 +16,7 @@ import chudgpt.exception.ChudException;
 import chudgpt.task.Priority;
 import chudgpt.task.Task;
 import chudgpt.task.TaskList;
+import chudgpt.task.ToDo;
 
 /** Tests loading valid and malformed saved task records. */
 public class StorageTest {
@@ -81,7 +82,7 @@ public class StorageTest {
         assertEquals(Priority.MEDIUM, tasks.getTask(6).getPriority());
         assertEquals(Priority.NONE, tasks.getTask(7).getPriority());
 
-        assertTrue(storage.save(tasks));
+        storage.save(tasks);
 
         assertEquals(String.join(System.lineSeparator(), "T | 1 | NONE | HIGH",
                 "D | 0 | NONE | old deadline | 2026-10-01",
@@ -110,10 +111,61 @@ public class StorageTest {
     }
 
     @Test
-    public void load_invalidDate_keepsExistingFailureBehavior() throws IOException {
+    public void load_invalidDate_skipsRecordAndReportsLineWarning() throws IOException, ChudException {
         Path saveFile = temporaryDirectory.resolve("tasks.txt");
         Files.writeString(saveFile, "D | 0 | HIGH | book | 2026-02-30");
 
-        assertThrows(ChudException.class, () -> new Storage(saveFile.toString()).load());
+        Storage.LoadResult result = new Storage(saveFile.toString()).loadWithWarnings();
+
+        assertTrue(result.tasks().isEmpty());
+        assertEquals(List.of("Line 1 was skipped: OOPS!!! Input a date in the format yyyy-mm-dd"),
+                result.warnings());
+    }
+
+    @Test
+    public void load_malformedAndDuplicateRecords_loadsValidRecordsAndCreatesBackupOnSave() throws Exception {
+        Path saveFile = temporaryDirectory.resolve("tasks.txt");
+        String original = String.join("\n", "T | 0 | NONE | first", "malformed",
+                "T | 1 | HIGH | FIRST", "E | 0 | NONE | event | 2026-10-02 | 2026-10-01",
+                "T | 0 | LOW | last");
+        Files.writeString(saveFile, original);
+        Storage storage = new Storage(saveFile.toString());
+
+        Storage.LoadResult result = storage.loadWithWarnings();
+
+        assertEquals(2, result.tasks().size());
+        assertEquals(List.of(
+                "Line 2 was skipped: The record does not contain enough fields.",
+                "Line 3 duplicates the task on line 1 and was skipped.",
+                "Line 4 was skipped: Event end date must be later than its start date."), result.warnings());
+
+        storage.save(new TaskList(result.tasks()));
+
+        assertEquals(original, Files.readString(temporaryDirectory.resolve("tasks.txt.bak")));
+        assertEquals("T | 0 | NONE | first" + System.lineSeparator() + "T | 0 | LOW | last",
+                Files.readString(saveFile));
+    }
+
+    @Test
+    public void save_targetIsDirectory_exceptionThrownWithoutSuccessResult() throws IOException {
+        Path saveTarget = temporaryDirectory.resolve("tasks");
+        Files.createDirectory(saveTarget);
+        Storage storage = new Storage(saveTarget.toString());
+
+        ChudException exception = assertThrows(ChudException.class, () ->
+                storage.save(new TaskList(List.of(new ToDo("task")))));
+
+        assertTrue(exception.getMessage().startsWith("Could not save tasks to "));
+        assertTrue(exception.getMessage().endsWith("Your changes are still available in this session."));
+    }
+
+    @Test
+    public void save_shortFileName_savesSuccessfully() throws Exception {
+        Path saveFile = temporaryDirectory.resolve("x");
+        Storage storage = new Storage(saveFile.toString());
+
+        storage.save(new TaskList(List.of(new ToDo("task"))));
+
+        assertEquals("T | 0 | NONE | task", Files.readString(saveFile));
     }
 }

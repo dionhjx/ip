@@ -3,7 +3,9 @@ package chudgpt.ui;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import chudgpt.ChudGpt;
 import chudgpt.exception.ChudException;
@@ -199,6 +201,22 @@ public class Ui {
      */
     public String getLoadErrorMessage() {
         return "OOPS!!! I couldn't retrieve the save file :( I'm such a chud...";
+    }
+
+    /**
+     * Returns a warning describing malformed records skipped while loading.
+     *
+     * @param warnings line-specific warnings produced by storage.
+     * @return formatted recovery warning.
+     */
+    public String getLoadWarningMessage(List<String> warnings) {
+        assert warnings != null : "Load warnings should not be null";
+        assert !warnings.isEmpty() : "A load warning message requires at least one warning";
+        String details = warnings.stream()
+                .map(warning -> "  " + warning)
+                .collect(Collectors.joining("\n"));
+        return "WARNING: Some saved tasks could not be loaded.\nDetails:\n" + details
+                + "\nA backup will be created before the recovered task list is saved.";
     }
 
     /**

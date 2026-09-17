@@ -15,8 +15,9 @@ public class ChudGpt {
     private final TaskList tasks;
     private final Parser parser;
     private final Ui ui;
-    /** Relative location of the task data, kept portable across operating systems. */
+    /** Storage used to load and save task data. */
     private final Storage storage;
+    private final String startupWarning;
     private boolean hasExited;
 
     /**
@@ -30,19 +31,28 @@ public class ChudGpt {
         parser = new Parser();
 
         TaskList loadedTasks;
+        String loadWarning = "";
         try {
-            loadedTasks = new TaskList(storage.load());
+            Storage.LoadResult loadResult = storage.loadWithWarnings();
+            loadedTasks = new TaskList(loadResult.tasks());
+            if (!loadResult.warnings().isEmpty()) {
+                loadWarning = ui.getLoadWarningMessage(loadResult.warnings());
+            }
         } catch (ChudException e) {
-            ui.display(ui.getLoadErrorMessage());
+            loadWarning = ui.getLoadErrorMessage() + "\nDetails:\n  " + e.getMessage();
             loadedTasks = new TaskList();
         }
 
         tasks = loadedTasks;
+        startupWarning = loadWarning;
     }
 
     /** Runs the command-line application. */
     public void run() {
         ui.display(ui.getWelcomeMessage());
+        if (!startupWarning.isEmpty()) {
+            ui.display(startupWarning);
+        }
 
         boolean isExit = false;
         while (!isExit) {
@@ -102,7 +112,10 @@ public class ChudGpt {
      * @return welcome message without the console logo and dividers.
      */
     public String getGuiWelcomeMessage() {
-        return "Hello! I'm ChudGPT.\nWhat can I do for you?";
+        String welcomeMessage = "Hello! I'm ChudGPT.\nWhat can I do for you?";
+        return startupWarning.isEmpty()
+                ? welcomeMessage
+                : welcomeMessage + "\n\n" + startupWarning;
     }
 
     /** Executes one command and returns its response and exit status. */
