@@ -3,7 +3,12 @@
 ChudGPT manages ToDos, deadlines, and events with completion status and optional priorities.
 Use Java 25. Run `chudgpt.ChudGpt.main()` in `src/main/java/chudgpt/ChudGpt.java` for the console,
 or `chudgpt.Launcher.main()` (also available through Gradle's `run` task) for the JavaFX interface.
-Both interfaces accept the same commands. The GUI displays replies in dialog boxes; `bye` disables its input controls.
+Both interfaces accept the same commands. The responsive GUI uses compact, right-aligned command bubbles and wider
+left-aligned response cards so long replies have more room. Error responses use a high-contrast red card, while task
+creation confirmations use a green success card. Large circular profile pictures clearly identify each participant.
+Priority labels are color coded in GUI responses: purple for EXTREME, red for HIGH, amber for
+MEDIUM, green for LOW, and muted gray for NONE. The GUI welcome card omits the console's text-art logo and divider
+lines. The window can be resized down to its minimum dimensions, and `bye` disables its input controls.
 
 The app loads `data/tasks.txt` relative to its working directory. A missing file means an empty task list.
 The folder and file are created when saving. There is no fixed 100-task limit.

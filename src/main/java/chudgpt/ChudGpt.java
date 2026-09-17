@@ -1,5 +1,6 @@
 package chudgpt;
 
+import chudgpt.command.AddTaskCommand;
 import chudgpt.command.Command;
 import chudgpt.exception.ChudException;
 import chudgpt.parser.Parser;
@@ -62,9 +63,19 @@ public class ChudGpt {
      * @return ChudGPT's response.
      */
     public String getResponse(String input) {
+        return getResponseDetails(input).text();
+    }
+
+    /**
+     * Returns ChudGPT's response and its presentation category.
+     *
+     * @param input the command entered by the user.
+     * @return response details suitable for presentation by the GUI.
+     */
+    public Response getResponseDetails(String input) {
         CommandResult result = executeCommand(input);
         updateExitStatus(result);
-        return result.response();
+        return new Response(result.response(), result.responseType());
     }
 
     /**
@@ -85,6 +96,15 @@ public class ChudGpt {
         return ui.getWelcomeMessage();
     }
 
+    /**
+     * Returns a compact welcome message suitable for the GUI.
+     *
+     * @return welcome message without the console logo and dividers.
+     */
+    public String getGuiWelcomeMessage() {
+        return "Hello! I'm ChudGPT.\nWhat can I do for you?";
+    }
+
     /** Executes one command and returns its response and exit status. */
     private CommandResult executeCommand(String input) {
         try {
@@ -93,9 +113,12 @@ public class ChudGpt {
 
             String response = command.execute(tasks, ui, storage);
             assert response != null : "Commands should return a response";
-            return new CommandResult(response, command.isExit());
+            ResponseType responseType = command instanceof AddTaskCommand
+                    ? ResponseType.TASK_ADDED
+                    : ResponseType.NORMAL;
+            return new CommandResult(response, command.isExit(), responseType);
         } catch (ChudException e) {
-            return new CommandResult(ui.getErrorMessage(e.getMessage()), false);
+            return new CommandResult(ui.getErrorMessage(e.getMessage()), false, ResponseType.ERROR);
         }
     }
 
@@ -105,8 +128,19 @@ public class ChudGpt {
         hasExited = hasExited || result.isExit();
     }
 
-    /** Stores the outcome of executing one command. */
-    private record CommandResult(String response, boolean isExit) {
+    /** Identifies how an application response should be presented by the GUI. */
+    public enum ResponseType {
+        NORMAL,
+        ERROR,
+        TASK_ADDED
+    }
+
+    /** Contains text and presentation information for one application response. */
+    public record Response(String text, ResponseType responseType) {
+    }
+
+    /** Stores the internal outcome of executing one command. */
+    private record CommandResult(String response, boolean isExit, ResponseType responseType) {
     }
 
     /**

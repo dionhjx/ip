@@ -1,5 +1,6 @@
 package chudgpt;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ScrollPane;
@@ -22,8 +23,8 @@ public class MainWindow extends AnchorPane {
 
     private ChudGpt chudGpt;
 
-    private Image userImage = new Image(this.getClass().getResourceAsStream("/images/User.png"));
-    private Image dukeImage = new Image(this.getClass().getResourceAsStream("/images/ChudGPT.png"));
+    private final Image userImage = new Image(this.getClass().getResourceAsStream("/images/User.png"));
+    private final Image dukeImage = new Image(this.getClass().getResourceAsStream("/images/ChudGPT.png"));
 
     @FXML
     public void initialize() {
@@ -38,7 +39,8 @@ public class MainWindow extends AnchorPane {
     public void setChud(ChudGpt chud) {
         assert chud != null : "Main window should receive an application instance";
         chudGpt = chud;
-        dialogContainer.getChildren().add(DialogBox.getDukeDialog(chudGpt.getWelcomeMessage(), dukeImage));
+        dialogContainer.getChildren().add(DialogBox.getDukeDialog(chudGpt.getGuiWelcomeMessage(), dukeImage));
+        Platform.runLater(userInput::requestFocus);
     }
 
     /**
@@ -49,12 +51,16 @@ public class MainWindow extends AnchorPane {
     private void handleUserInput() {
         assert chudGpt != null : "Application should be set before handling input";
         String input = userInput.getText();
-        String response = chudGpt.getResponse(input);
-        dialogContainer.getChildren().addAll(
-                DialogBox.getUserDialog(input, userImage),
-                DialogBox.getDukeDialog(response, dukeImage)
-        );
+        ChudGpt.Response response = chudGpt.getResponseDetails(input);
+        DialogBox responseDialog = switch (response.responseType()) {
+            case ERROR -> DialogBox.getErrorDialog(response.text(), dukeImage);
+            case TASK_ADDED -> DialogBox.getSuccessDialog(response.text(), dukeImage);
+            case NORMAL -> DialogBox.getDukeDialog(response.text(), dukeImage);
+        };
+
+        dialogContainer.getChildren().addAll(DialogBox.getUserDialog(input, userImage), responseDialog);
         userInput.clear();
+        userInput.requestFocus();
 
         if (chudGpt.hasExited()) {
             disableInput();
