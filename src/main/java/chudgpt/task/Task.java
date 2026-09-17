@@ -1,5 +1,7 @@
 package chudgpt.task;
 
+import java.util.Objects;
+
 /** Common state and display behavior shared by all supported task types. */
 public abstract class Task {
     /** Whether this task is complete. */
@@ -7,6 +9,8 @@ public abstract class Task {
 
     /** Description of this task. */
     protected final String description;
+
+    private Priority priority = Priority.NONE;
 
     protected Task(String description) {
         assert description != null : "Task description should not be null";
@@ -29,9 +33,24 @@ public abstract class Task {
         return isCompleted;
     }
 
+    public Priority getPriority() {
+        return priority;
+    }
+
+    /**
+     * Assigns a priority without changing any other task details.
+     *
+     * @param priority non-null priority to assign.
+     * @return this task.
+     */
+    public Task setPriority(Priority priority) {
+        this.priority = Objects.requireNonNull(priority, "Task priority must not be null");
+        return this;
+    }
+
     @Override
     public String toString() {
-        return String.format("[%s] %s", isCompleted ? "X" : " ", description);
+        return String.format("[%s]%s %s", isCompleted ? "X" : " ", priority.getDisplayLabel(), description);
     }
 
     /**

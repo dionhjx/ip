@@ -6,6 +6,22 @@ import chudgpt.ui.Ui;
 
 /** Displays all tasks in the current task list. */
 public class ListCommand extends Command {
+    private final boolean isSortedByPriority;
+
+    /** Creates a command that lists tasks in their underlying order. */
+    public ListCommand() {
+        this(false);
+    }
+
+    /**
+     * Creates a command that lists tasks in the requested display order.
+     *
+     * @param isSortedByPriority whether to display a priority-sorted view.
+     */
+    public ListCommand(boolean isSortedByPriority) {
+        this.isSortedByPriority = isSortedByPriority;
+    }
+
     /**
      * Returns the current task list message created by the UI handler.
      *
@@ -16,6 +32,6 @@ public class ListCommand extends Command {
      */
     @Override
     public String execute(TaskList tasks, Ui ui, Storage storage) {
-        return ui.getTaskListMessage(tasks);
+        return ui.getTaskListMessage(tasks, isSortedByPriority);
     }
 }

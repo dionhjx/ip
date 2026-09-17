@@ -3,6 +3,7 @@ package chudgpt;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ public class ChudGptTest {
 
         chudGpt.getResponse("todo read book");
 
-        assertEquals("Here are the tasks in your list:\n1. [T][ ] read book",
+        assertEquals("Here are the tasks in your list:\n1. [T][ ][P:NONE   ] read book",
                 chudGpt.getResponse("list"));
     }
 
@@ -57,6 +58,55 @@ public class ChudGptTest {
         chudGpt.getResponse("bye");
 
         assertTrue(chudGpt.hasExited());
+    }
+
+    @Test
+    public void getResponse_sortedViewThenCommands_targetCurrentUnderlyingNumbers() {
+        ChudGpt chudGpt = createChudGpt();
+        chudGpt.getResponse("todo first");
+        chudGpt.getResponse("todo second /priority extreme");
+
+        assertEquals("Here are the tasks in your list:\n2. [T][ ][P:EXTREME] second\n1. [T][ ][P:NONE   ] first",
+                chudGpt.getResponse("  LIST /SORT   PRIORITY  "));
+        chudGpt.getResponse("mark 2");
+        assertEquals("Got it. I've set this task's priority to HIGH:\n  [T][X][P:HIGH   ] second",
+                chudGpt.getResponse("priority 2 high"));
+        chudGpt.getResponse("delete 1");
+
+        assertEquals("Here are the tasks in your list:\n1. [T][X][P:HIGH   ] second", chudGpt.getResponse("list"));
+        assertEquals(chudGpt.getResponse("list"), createChudGpt().getResponse("list"));
+    }
+
+    @Test
+    public void getResponse_invalidPriorityCommands_preserveTaskListAndFile() throws Exception {
+        ChudGpt chudGpt = createChudGpt();
+        chudGpt.getResponse("todo book /priority low");
+        String expected = chudGpt.getResponse("list");
+        Path file = temporaryDirectory.resolve("tasks.txt");
+        String saved = Files.readString(file);
+
+        assertEquals("OOPS!!! I've run into an error :( I'm such a chud...\nDetails:\n  "
+                + "The /priority argument requires a priority value.",
+                chudGpt.getResponse("todo extra /priority"));
+        for (String command : new String[]{"todo extra /priority 1", "priority", "priority 1 urgent",
+            "priority 0 high", "priority -1 high", "priority 2 high", "priority one high"}) {
+            assertTrue(chudGpt.getResponse(command).startsWith("OOPS!!!"));
+        }
+
+        assertEquals(expected, chudGpt.getResponse("list"));
+        assertEquals(saved, Files.readString(file));
+    }
+
+    @Test
+    public void getResponse_invalidListArguments_reportUsage() {
+        ChudGpt chudGpt = createChudGpt();
+        chudGpt.getResponse("todo first");
+        chudGpt.getResponse("todo second /priority high");
+        for (String command : new String[]{"list extra", "list /sort", "list /sort date",
+            "list /sort priority extra"}) {
+            assertEquals("OOPS!!! I've run into an error :( I'm such a chud...\nDetails:\n  "
+                    + "Usage: list or list /sort priority.", chudGpt.getResponse(command));
+        }
     }
 
     /** Returns a ChudGPT instance backed by a temporary save file. */

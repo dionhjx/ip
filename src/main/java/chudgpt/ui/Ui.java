@@ -7,6 +7,7 @@ import java.util.Scanner;
 
 import chudgpt.ChudGpt;
 import chudgpt.exception.ChudException;
+import chudgpt.task.Priority;
 import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 
@@ -53,10 +54,22 @@ public class Ui {
      * @return the task-list message.
      */
     public String getTaskListMessage(TaskList tasks) {
+        return getTaskListMessage(tasks, false);
+    }
+
+    /**
+     * Returns a task-list message in the requested display order.
+     *
+     * @param tasks current tasks.
+     * @param isSortedByPriority whether to use a priority-sorted view.
+     * @return task-list message with current underlying task numbers.
+     */
+    public String getTaskListMessage(TaskList tasks, boolean isSortedByPriority) {
         if (tasks.size() == 0) {
             return "You have no tasks in your list! Try adding some";
         }
-        return "Here are the tasks in your list:\n" + tasks;
+        String taskDisplay = isSortedByPriority ? tasks.toPrioritySortedString() : tasks.toString();
+        return "Here are the tasks in your list:\n" + taskDisplay;
     }
 
     /**
@@ -120,8 +133,21 @@ public class Ui {
      */
     public String getTaskStatusMessage(Task task) {
         return task.isCompleted()
-                ? "Nice! I've marked this task as completed!"
+                ? "Nice! I've marked this task as completed!\n  " + task
                 : "OK, I've marked this task as incomplete.\n  " + task;
+    }
+
+    /**
+     * Returns a confirmation for any priority assignment, including NONE and repeated assignments.
+     *
+     * @param task updated task.
+     * @return priority-change message.
+     */
+    public String getTaskPriorityMessage(Task task) {
+        if (task.getPriority() == Priority.NONE) {
+            return "Got it. I've removed the priority from this task:\n  " + task;
+        }
+        return "Got it. I've set this task's priority to " + task.getPriority() + ":\n  " + task;
     }
 
     /** Returns the message showing the updated task-list size. */
