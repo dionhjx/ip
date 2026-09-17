@@ -72,10 +72,23 @@ public class ParserTest {
     }
 
     @Test
+    public void parse_unexpectedOrMissingArguments_exceptionThrown() {
+        assertChudException("Usage: hi.", () -> parser.parse("hi there"));
+        assertChudException("Usage: save.", () -> parser.parse("save now"));
+        assertChudException("Usage: bye.", () -> parser.parse("bye later"));
+        assertChudException("Usage: delete <task number>.", () -> parser.parse("delete"));
+        assertChudException("Usage: mark <task number>.", () -> parser.parse("mark 1 2"));
+        assertChudException("Usage: unmark <task number>.", () -> parser.parse("unmark"));
+        assertChudException("Usage: find <keyword>.", () -> parser.parse("find"));
+    }
+
+    @Test
     public void parse_invalidTaskNumber_exceptionThrown() {
-        assertChudException("Task number must be a number.", () -> parser.parse("delete one"));
-        assertChudException("Task number must be a number.", () -> parser.parse("mark 1.5"));
-        assertChudException("Task number must be a number.", () -> parser.parse("unmark 2147483648"));
+        assertChudException("Task number must be a positive whole number.", () -> parser.parse("delete one"));
+        assertChudException("Task number must be a positive whole number.", () -> parser.parse("mark 1.5"));
+        assertChudException("Task number must be a positive whole number.", () -> parser.parse("mark +1"));
+        assertChudException("Task numbers start from 1.", () -> parser.parse("delete 0"));
+        assertChudException("Task number is too large.", () -> parser.parse("unmark 2147483648"));
     }
 
     @Test
@@ -94,11 +107,9 @@ public class ParserTest {
 
     @Test
     public void parseDeadlineCommand_emptyDescriptionOrDate_exceptionThrown() {
-        String expectedMessage = "OOPS!!! The description of a deadline cannot be empty";
-
-        assertChudException(expectedMessage, () ->
+        assertChudException("Task description cannot be empty.", () ->
                 parser.parse("deadline  /by 2026-09-09"));
-        assertChudException(expectedMessage, () ->
+        assertChudException("Deadline date cannot be empty.", () ->
                 parser.parse("deadline return book /by "));
     }
 
@@ -125,16 +136,22 @@ public class ParserTest {
 
     @Test
     public void parseEventCommand_emptyDescriptionOrDate_exceptionThrown() {
-        String expectedMessage = """
-                OOPS!!! The description, start and end date of an event cannot be empty
-                """;
+        assertChudException("Task description cannot be empty.", () ->
+                parser.parse("event  /from 2026-09-09 /to 2026-09-10"));
+        assertChudException("Event start and end dates cannot be empty.", () ->
+                parser.parse("event project meeting /from /to 2026-09-10"));
+        assertChudException("Event start and end dates cannot be empty.", () ->
+                parser.parse("event project meeting /from 2026-09-09 /to "));
+    }
+
+    @Test
+    public void parseEventCommand_nonIncreasingDateRange_exceptionThrown() {
+        String expectedMessage = "Event end date must be later than its start date.";
 
         assertChudException(expectedMessage, () ->
-                parser.parse("event  /from 2026-09-09 /to 2026-09-10"));
+                parser.parse("event meeting /from 2026-09-10 /to 2026-09-10"));
         assertChudException(expectedMessage, () ->
-                parser.parse("event project meeting /from /to 2026-09-10"));
-        assertChudException(expectedMessage, () ->
-                parser.parse("event project meeting /from 2026-09-09 /to "));
+                parser.parse("event meeting /from 2026-09-11 /to 2026-09-10"));
     }
 
     @Test
@@ -145,11 +162,10 @@ public class ParserTest {
 
     @Test
     public void parseIndex_nonNumber_exceptionThrown() {
-        String expectedMessage = "Task number must be a number.";
-
-        assertChudException(expectedMessage, () -> Parser.parseIndex("one"));
-        assertChudException(expectedMessage, () -> Parser.parseIndex(""));
-        assertChudException(expectedMessage, () -> Parser.parseIndex("2147483648"));
+        assertChudException("Task number must be a positive whole number.", () -> Parser.parseIndex("one"));
+        assertChudException("Task number must be a positive whole number.", () -> Parser.parseIndex(""));
+        assertChudException("Task numbers start from 1.", () -> Parser.parseIndex("0"));
+        assertChudException("Task number is too large.", () -> Parser.parseIndex("2147483648"));
     }
 
     @Test
@@ -182,7 +198,17 @@ public class ParserTest {
         assertEquals("[T][ ][P:NONE   ] document/priority high /priority-high",
                 parseTaskCommand("todo document/priority high /priority-high").toString());
         assertEquals("[T][ ][P:NONE   ] mixed case", parseTaskCommand("todo Mixed CASE").toString());
-        assertEquals("[T][ ][P:NONE   ] ", parseTaskCommand("todo").toString());
+        assertChudException("Task description cannot be empty.", () -> parser.parse("todo"));
+    }
+
+    @Test
+    public void parse_unsafeOrExcessiveDescription_exceptionThrown() {
+        assertChudException("Task description cannot contain '|' or control characters.", () ->
+                parser.parse("todo first | second"));
+        assertChudException("Task description cannot contain '|' or control characters.", () ->
+                parser.parse("todo first\nsecond"));
+        assertChudException("Task description cannot exceed 200 characters.", () ->
+                parser.parse("todo " + "a".repeat(201)));
     }
 
     @Test
@@ -231,7 +257,10 @@ public class ParserTest {
             assertChudException("Usage: priority <task number> <priority>.", () -> parser.parse(command));
         }
         for (String value : new String[]{"one", "1.5", "2147483648"}) {
-            assertChudException("Task number must be a number.", () -> parser.parse("priority " + value + " high"));
+            String expectedMessage = value.equals("2147483648")
+                    ? "Task number is too large."
+                    : "Task number must be a positive whole number.";
+            assertChudException(expectedMessage, () -> parser.parse("priority " + value + " high"));
         }
     }
 

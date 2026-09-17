@@ -11,9 +11,6 @@ import chudgpt.exception.ChudException;
 
 /** Stores tasks in their display and serialization order. */
 public class TaskList {
-    private static final String INDEX_OUT_OF_BOUNDS_MESSAGE = "Index out of bounds";
-    private static final String UPDATE_INDEX_OUT_OF_BOUNDS_MESSAGE = "Index out of bounds.";
-
     private final List<Task> tasks;
 
     /** Creates an empty task list. */
@@ -49,6 +46,29 @@ public class TaskList {
     }
 
     /**
+     * Adds a task unless an existing task has the same type and details.
+     *
+     * @param task task to add.
+     * @return the task that was added.
+     * @throws ChudException if the task duplicates an existing task.
+     */
+    public Task addUniqueTask(Task task) throws ChudException {
+        int duplicateIndex = findDuplicateIndex(task);
+        if (duplicateIndex >= 0) {
+            throw new ChudException("This task duplicates task " + (duplicateIndex + 1) + ".");
+        }
+        return addTask(task);
+    }
+
+    /** Returns the zero-based index of a task with the same details, or {@code -1} if none exists. */
+    private int findDuplicateIndex(Task candidate) {
+        return IntStream.range(0, tasks.size())
+                .filter(index -> tasks.get(index).hasSameDetails(candidate))
+                .findFirst()
+                .orElse(-1);
+    }
+
+    /**
      * Removes the specified task from the list.
      *
      * @param index the index of the task to be removed
@@ -56,7 +76,7 @@ public class TaskList {
      * @throws ChudException if the index is out of range
      */
     public Task deleteTask(int index) throws ChudException {
-        validateIndex(index, INDEX_OUT_OF_BOUNDS_MESSAGE);
+        validateIndex(index);
 
         int previousSize = tasks.size();
         Task deletedTask = tasks.remove(index);
@@ -74,7 +94,7 @@ public class TaskList {
      * @throws ChudException if the index is out of range
      */
     public Task getTask(int index) throws ChudException {
-        validateIndex(index, INDEX_OUT_OF_BOUNDS_MESSAGE);
+        validateIndex(index);
         return tasks.get(index);
     }
 
@@ -87,10 +107,7 @@ public class TaskList {
      * @throws ChudException if the index is out of range.
      */
     public Task updateTask(int index, boolean isCompleted) throws ChudException {
-        validateIndex(index, UPDATE_INDEX_OUT_OF_BOUNDS_MESSAGE);
-        if (index < 0 || index >= tasks.size()) {
-            throw new ChudException("Index out of bounds.");
-        }
+        validateIndex(index);
 
         Task updatedTask = tasks.get(index).setCompleted(isCompleted);
         assert updatedTask.isCompleted() == isCompleted : "Updated task should have the requested status";
@@ -106,14 +123,15 @@ public class TaskList {
      * @throws ChudException if the index is out of range.
      */
     public Task updatePriority(int index, Priority priority) throws ChudException {
-        validateIndex(index, UPDATE_INDEX_OUT_OF_BOUNDS_MESSAGE);
+        validateIndex(index);
         return tasks.get(index).setPriority(priority);
     }
 
     /** Ensures that an index identifies a task currently in the list. */
-    private void validateIndex(int index, String errorMessage) throws ChudException {
+    private void validateIndex(int index) throws ChudException {
         if (index < 0 || index >= tasks.size()) {
-            throw new ChudException(errorMessage);
+            long taskNumber = (long) index + 1;
+            throw new ChudException("Task number " + taskNumber + " does not exist.");
         }
     }
 

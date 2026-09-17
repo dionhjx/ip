@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,6 +27,32 @@ public class TaskListTest {
         assertSame(task, addedTask);
         assertEquals(1, taskList.size());
         assertSame(task, taskList.getTask(0));
+    }
+
+    @Test
+    public void addUniqueTask_sameNormalizedDetails_exceptionThrown() throws ChudException {
+        TaskList taskList = new TaskList();
+        taskList.addUniqueTask(new ToDo("Read   Book"));
+
+        ChudException exception = assertThrows(ChudException.class, () ->
+                taskList.addUniqueTask(new ToDo(" read book ").setPriority(Priority.HIGH)));
+
+        assertEquals("This task duplicates task 1.", exception.getMessage());
+        assertEquals(1, taskList.size());
+    }
+
+    @Test
+    public void addUniqueTask_differentTypeOrDates_tasksAdded() throws ChudException {
+        TaskList taskList = new TaskList();
+        LocalDate firstDate = LocalDate.of(2026, 10, 1);
+        LocalDate secondDate = LocalDate.of(2026, 10, 2);
+
+        taskList.addUniqueTask(new ToDo("task"));
+        taskList.addUniqueTask(new Deadline("task", firstDate));
+        taskList.addUniqueTask(new Deadline("task", secondDate));
+        taskList.addUniqueTask(new Event("task", firstDate, secondDate));
+
+        assertEquals(4, taskList.size());
     }
 
     @Test
@@ -79,8 +106,8 @@ public class TaskListTest {
         ChudException indexAfterLastException = assertThrows(ChudException.class, () ->
                 taskList.getTask(taskList.size()));
 
-        assertEquals("Index out of bounds", negativeIndexException.getMessage());
-        assertEquals("Index out of bounds", indexAfterLastException.getMessage());
+        assertEquals("Task number 0 does not exist.", negativeIndexException.getMessage());
+        assertEquals("Task number 2 does not exist.", indexAfterLastException.getMessage());
         assertEquals(1, taskList.size());
     }
 
@@ -109,8 +136,8 @@ public class TaskListTest {
         ChudException indexAfterLastException = assertThrows(ChudException.class, () ->
                 taskList.updateTask(taskList.size(), true));
 
-        assertEquals("Index out of bounds.", negativeIndexException.getMessage());
-        assertEquals("Index out of bounds.", indexAfterLastException.getMessage());
+        assertEquals("Task number 0 does not exist.", negativeIndexException.getMessage());
+        assertEquals("Task number 2 does not exist.", indexAfterLastException.getMessage());
         assertFalse(task.isCompleted());
         assertEquals(1, taskList.size());
     }
@@ -163,7 +190,7 @@ public class TaskListTest {
         ChudException exception = assertThrows(ChudException.class, () ->
                 taskList.deleteTask(0));
 
-        assertEquals("Index out of bounds", exception.getMessage());
+        assertEquals("Task number 1 does not exist.", exception.getMessage());
         assertEquals(0, taskList.size());
     }
 
@@ -175,7 +202,7 @@ public class TaskListTest {
         ChudException exception = assertThrows(ChudException.class, () ->
                 taskList.deleteTask(-1));
 
-        assertEquals("Index out of bounds", exception.getMessage());
+        assertEquals("Task number 0 does not exist.", exception.getMessage());
         assertEquals(1, taskList.size());
         assertSame(task, taskList.getTask(0));
     }
@@ -188,7 +215,7 @@ public class TaskListTest {
         ChudException exception = assertThrows(ChudException.class, () ->
                 taskList.deleteTask(taskList.size()));
 
-        assertEquals("Index out of bounds", exception.getMessage());
+        assertEquals("Task number 2 does not exist.", exception.getMessage());
         assertEquals(1, taskList.size());
         assertSame(task, taskList.getTask(0));
     }
@@ -234,7 +261,7 @@ public class TaskListTest {
         for (int index : new int[]{-1, 2, Integer.MAX_VALUE}) {
             ChudException exception = assertThrows(ChudException.class, () ->
                     tasks.updatePriority(index, Priority.LOW));
-            assertEquals("Index out of bounds.", exception.getMessage());
+            assertEquals("Task number " + ((long) index + 1) + " does not exist.", exception.getMessage());
         }
         assertEquals(saved, tasks.toFileFormat());
         assertThrows(ChudException.class, () -> new TaskList().updatePriority(0, Priority.HIGH));

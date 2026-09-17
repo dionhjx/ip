@@ -1,5 +1,6 @@
 package chudgpt.command;
 
+import chudgpt.exception.ChudException;
 import chudgpt.storage.Storage;
 import chudgpt.task.Task;
 import chudgpt.task.TaskList;
@@ -25,10 +26,11 @@ public class AddTaskCommand extends Command {
      * @param ui the UI handler used to create the confirmation
      * @param storage the storage handler used to save the updated list
      * @return the response confirming that the task was added
+     * @throws ChudException if the task is a duplicate or cannot be saved.
      */
     @Override
-    public String execute(TaskList tasks, Ui ui, Storage storage) {
-        tasks.addTask(taskToAdd);
+    public String execute(TaskList tasks, Ui ui, Storage storage) throws ChudException {
+        tasks.addUniqueTask(taskToAdd);
         storage.save(tasks);
         return ui.getTaskAddedMessage(taskToAdd, tasks.size());
     }

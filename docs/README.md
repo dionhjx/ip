@@ -18,6 +18,8 @@ The folder and file are created when saving. There is no fixed 100-task limit.
 Commands and priority keywords are case-insensitive. Surrounding command whitespace is ignored.
 The existing parser also lowercases task descriptions. Dates use `yyyy-mm-dd`, such as `2026-10-01`;
 natural-language dates and times such as `Sunday` and `Mon 2pm` are not accepted.
+Descriptions must contain 1-200 characters and cannot contain `|`, line breaks, or control characters because
+those values would corrupt the save-file format.
 
 | Command | Purpose |
 | --- | --- |
@@ -148,13 +150,23 @@ Details:
 
 `priority`, `priority 1`, and `priority 1 high extra` return the detail
 `Usage: priority <task number> <priority>.` A non-integer task number produces
-`Task number must be a number.` An out-of-range number produces `Index out of bounds.`
+`Task number must be a positive whole number.` An unavailable number identifies the task number that does not exist.
 Priority-command shape is checked first, then integer syntax, then the keyword, then the task's existence.
 Rejected priority commands do not modify or save the list.
 
-Existing validation remains in effect: unknown commands produce `Invalid command.`, blank commands produce
-`Please enter a command.`, and deadlines/events require descriptions and dates. Blank ToDo descriptions remain
-accepted by the current application; this existing limitation has not been changed by priority support.
+Unknown commands produce `Invalid command.`, while blank commands produce `Please enter a command.` All task types
+require a nonblank description. Commands validate their complete shape: for example, `hi extra`, `save now`,
+`delete`, and `mark 1 2` are rejected with command-specific usage messages instead of silently ignoring arguments.
+
+Event end dates must be later than their start dates; equal or reversed ranges are rejected. Calendar validation
+also rejects non-existent dates such as February 30. A newly added task is rejected as a duplicate when an existing
+task has the same type, normalized description, and dates. Case and repeated whitespace do not make a duplicate
+description unique. Completion status and priority are ignored for duplicate detection.
+
+Task numbers must be positive whole numbers starting from 1. Missing numbers produce the relevant command usage,
+values such as `one`, `1.5`, `-1`, and `+1` produce `Task number must be a positive whole number.`, zero produces
+`Task numbers start from 1.`, and excessively large numbers produce `Task number is too large.` A valid number that
+is not present in the current list produces `Task number <number> does not exist.`
 
 ## Completion, deletion, and other responses
 
@@ -182,9 +194,10 @@ Response examples omit the welcome banner and the console's divider lines around
 
 ## Saving and compatibility
 
-Adding, deleting, marking, unmarking, and changing a priority invoke the existing automatic-save behavior.
-`save` and `bye` also save. Existing save failures print `Error saving task list to file.` to standard error;
-the command response still confirms the in-memory change. Priority support does not change that behavior.
+Adding, deleting, marking, unmarking, and changing a priority invoke automatic saving. `save` and `bye` also save.
+Saving first writes a temporary file and then replaces the task file atomically when the file system supports it.
+If saving fails, the app reports the failure instead of displaying a success confirmation. Changes already made
+remain available in the current session so the user can retry. A failed `bye` does not exit the app.
 
 The save file uses these formats; completion is `0` for incomplete and `1` for complete:
 
@@ -208,9 +221,11 @@ Legacy and new records can coexist. Field count determines the format: `T | 0 | 
 description is `HIGH`, not a malformed priority record. Loading alone does not rewrite the file; the next save
 (including `bye`) writes every loaded task in the new format. Older app versions need not read the new format.
 
-Records with invalid explicit priorities, invalid completion statuses, unknown task types, or invalid field counts
-are skipped. Invalid calendar dates retain the existing load-error behavior. Descriptions containing `|` are not
-escaped by the existing text format and do not reliably survive saving and loading.
+Records with invalid priorities, completion statuses, task types, field counts, descriptions, dates, event ranges,
+or duplicate task details are skipped independently. Valid records before and after a malformed line still load.
+The startup warning identifies every skipped line and its reason. Before the recovered list is next saved, the
+original file is copied to `tasks.txt.bak`; if that backup cannot be created, saving is aborted. A missing task file
+still represents an empty list, while unreadable paths and directories are reported as loading errors.
 
 ## Development checks
 

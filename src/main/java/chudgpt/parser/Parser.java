@@ -25,6 +25,7 @@ import chudgpt.task.ToDo;
 
 /** Parses task commands and task-number arguments entered by the user. */
 public class Parser {
+    private static final int MAX_DESCRIPTION_LENGTH = 200;
     private static final Pattern PRIORITY_TOKEN = Pattern.compile("(?<!\\S)/priority(?!\\S)");
     private static final String PRIORITY_SYNTAX_MESSAGE =
             "The /priority argument can only be specified once.";
@@ -54,18 +55,35 @@ public class Parser {
         }
 
         return switch (commandName) {
-            case "hi" -> new HiCommand();
-            case "bye" -> new ExitCommand();
+            case "hi" -> createNoArgumentCommand(params, new HiCommand(), "Usage: hi.");
+            case "bye" -> createNoArgumentCommand(params, new ExitCommand(), "Usage: bye.");
             case "list" -> createListCommand(params);
-            case "save" -> new SaveCommand();
+            case "save" -> createNoArgumentCommand(params, new SaveCommand(), "Usage: save.");
             case "todo", "deadline", "event" -> new AddTaskCommand(createTask(commandName, params));
             case "priority" -> createPriorityCommand(params);
-            case "delete" -> new DeleteTaskCommand(parseIndex(params));
-            case "mark" -> new ChangeTaskStatusCommand(parseIndex(params), true);
-            case "unmark" -> new ChangeTaskStatusCommand(parseIndex(params), false);
-            case "find" -> new FindCommand(params);
+            case "delete" -> new DeleteTaskCommand(parseSingleIndex(params, "Usage: delete <task number>."));
+            case "mark" -> new ChangeTaskStatusCommand(parseSingleIndex(params, "Usage: mark <task number>."), true);
+            case "unmark" -> new ChangeTaskStatusCommand(
+                    parseSingleIndex(params, "Usage: unmark <task number>."), false);
+            case "find" -> createFindCommand(params);
             default -> throw new ChudException("Invalid command.");
         };
+    }
+
+    /** Returns a no-argument command after rejecting unexpected parameters. */
+    private Command createNoArgumentCommand(String params, Command command, String usage) throws ChudException {
+        if (!params.isEmpty()) {
+            throw new ChudException(usage);
+        }
+        return command;
+    }
+
+    /** Returns a find command after ensuring that a keyword was supplied. */
+    private Command createFindCommand(String params) throws ChudException {
+        if (params.isBlank()) {
+            throw new ChudException("Usage: find <keyword>.");
+        }
+        return new FindCommand(params);
     }
 
     /** Removes an optional final priority clause before using the existing task parsers. */
@@ -94,7 +112,7 @@ public class Parser {
         }
 
         Task task = switch (commandName) {
-            case "todo" -> new ToDo(params);
+            case "todo" -> new ToDo(validateDescription(params));
             case "deadline" -> createDeadlineTask(params);
             case "event" -> createEventTask(params);
             default -> throw new ChudException("Invalid command.");
@@ -124,6 +142,14 @@ public class Parser {
         return new ChangeTaskPriorityCommand(index, priority);
     }
 
+    /** Parses the only argument of a task-number command. */
+    private int parseSingleIndex(String params, String usage) throws ChudException {
+        if (params.isBlank() || params.split("\\s+").length != 1) {
+            throw new ChudException(usage);
+        }
+        return parseIndex(params);
+    }
+
     /**
      * Parses a deadline task from its description and due date.
      *
@@ -140,8 +166,9 @@ public class Parser {
         String description = params.substring(0, byIndex).trim();
         String submitBy = params.substring(byIndex + 3).trim();
 
-        if (description.isEmpty() || submitBy.isEmpty()) {
-            throw new ChudException("OOPS!!! The description of a deadline cannot be empty");
+        validateDescription(description);
+        if (submitBy.isEmpty()) {
+            throw new ChudException("Deadline date cannot be empty.");
         }
         return new Deadline(description, parseDate(submitBy));
     }
@@ -163,12 +190,14 @@ public class Parser {
         String description = params.substring(0, fromIndex).trim();
         String start = params.substring(fromIndex + 5, toIndex).trim();
         String end = params.substring(toIndex + 3).trim();
-        if (description.isEmpty() || start.isEmpty() || end.isEmpty()) {
-            throw new ChudException("""
-                        OOPS!!! The description, start and end date of an event cannot be empty
-                        """);
+        validateDescription(description);
+        if (start.isEmpty() || end.isEmpty()) {
+            throw new ChudException("Event start and end dates cannot be empty.");
         }
-        return new Event(description, parseDate(start), parseDate(end));
+        LocalDate startDate = parseDate(start);
+        LocalDate endDate = parseDate(end);
+        validateEventDates(startDate, endDate);
+        return new Event(description, startDate, endDate);
     }
 
     /**
@@ -176,13 +205,54 @@ public class Parser {
      *
      * @param params task number entered by the user.
      * @return zero-based task index.
-     * @throws ChudException if the value is not an integer.
+     * @throws ChudException if the value is not a supported positive task number.
      */
     public static int parseIndex(String params) throws ChudException {
+        if (!params.matches("\\d+")) {
+            throw new ChudException("Task number must be a positive whole number.");
+        }
         try {
-            return Integer.parseInt(params) - 1;
+            int taskNumber = Integer.parseInt(params);
+            if (taskNumber < 1) {
+                throw new ChudException("Task numbers start from 1.");
+            }
+            return taskNumber - 1;
         } catch (NumberFormatException e) {
-            throw new ChudException("Task number must be a number.");
+            throw new ChudException("Task number is too large.");
+        }
+    }
+
+    /**
+     * Validates and returns a task description supplied by a user or save file.
+     *
+     * @param description task description to validate.
+     * @return the validated description.
+     * @throws ChudException if the description is blank or unsafe to store.
+     */
+    public static String validateDescription(String description) throws ChudException {
+        if (description == null || description.isBlank()) {
+            throw new ChudException("Task description cannot be empty.");
+        }
+        if (description.length() > MAX_DESCRIPTION_LENGTH) {
+            throw new ChudException("Task description cannot exceed " + MAX_DESCRIPTION_LENGTH + " characters.");
+        }
+        if (description.indexOf('|') >= 0
+                || description.codePoints().anyMatch(Character::isISOControl)) {
+            throw new ChudException("Task description cannot contain '|' or control characters.");
+        }
+        return description;
+    }
+
+    /**
+     * Ensures that an event ends after it starts.
+     *
+     * @param start event start date.
+     * @param end event end date.
+     * @throws ChudException if the end date is not later than the start date.
+     */
+    public static void validateEventDates(LocalDate start, LocalDate end) throws ChudException {
+        if (!start.isBefore(end)) {
+            throw new ChudException("Event end date must be later than its start date.");
         }
     }
 

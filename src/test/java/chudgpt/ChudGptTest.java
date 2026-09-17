@@ -35,6 +35,27 @@ public class ChudGptTest {
     }
 
     @Test
+    public void getResponse_emptyTodoAndUnexpectedArguments_returnsUsageErrors() {
+        ChudGpt chudGpt = createChudGpt();
+
+        assertTrue(chudGpt.getResponse("todo").endsWith("Task description cannot be empty."));
+        assertTrue(chudGpt.getResponse("hi there").endsWith("Usage: hi."));
+        assertTrue(chudGpt.getResponse("delete 1 2").endsWith("Usage: delete <task number>."));
+        assertEquals("You have no tasks in your list! Try adding some", chudGpt.getResponse("list"));
+    }
+
+    @Test
+    public void getResponse_duplicateTask_rejectsNormalizedDuplicate() {
+        ChudGpt chudGpt = createChudGpt();
+        chudGpt.getResponse("todo read   book /priority low");
+
+        assertTrue(chudGpt.getResponse("todo READ BOOK /priority high")
+                .endsWith("This task duplicates task 1."));
+        assertTrue(chudGpt.getResponse("deadline read book /by 2026-10-01").startsWith("Got it."));
+        assertTrue(chudGpt.getResponse("list").contains("2. [D]"));
+    }
+
+    @Test
     public void getResponseDetails_normalErrorAndTaskAddedCommands_returnsPresentationType() {
         ChudGpt chudGpt = createChudGpt();
 
@@ -82,6 +103,35 @@ public class ChudGptTest {
         chudGpt.getResponse("bye");
 
         assertTrue(chudGpt.hasExited());
+    }
+
+    @Test
+    public void getResponse_saveFailure_reportsErrorAndDoesNotExit() throws Exception {
+        Path saveTarget = temporaryDirectory.resolve("tasks");
+        Files.createDirectory(saveTarget);
+        ChudGpt chudGpt = new ChudGpt(saveTarget.toString());
+
+        String addResponse = chudGpt.getResponse("todo read book");
+        String exitResponse = chudGpt.getResponse("bye");
+
+        assertTrue(addResponse.contains("Could not save tasks to "));
+        assertTrue(addResponse.endsWith("Your changes are still available in this session."));
+        assertEquals("Here are the tasks in your list:\n1. [T][ ][P:NONE   ] read book",
+                chudGpt.getResponse("list"));
+        assertTrue(exitResponse.contains("Could not save tasks to "));
+        assertFalse(chudGpt.hasExited());
+    }
+
+    @Test
+    public void getGuiWelcomeMessage_malformedSaveFile_reportsRecoveryWarning() throws Exception {
+        Files.writeString(temporaryDirectory.resolve("tasks.txt"),
+                "T | 0 | NONE | valid\nD | 0 | HIGH | invalid | 2026-02-30");
+
+        String welcomeMessage = createChudGpt().getGuiWelcomeMessage();
+
+        assertTrue(welcomeMessage.contains("Some saved tasks could not be loaded"));
+        assertTrue(welcomeMessage.contains("Line 2 was skipped"));
+        assertTrue(welcomeMessage.contains("A backup will be created"));
     }
 
     @Test

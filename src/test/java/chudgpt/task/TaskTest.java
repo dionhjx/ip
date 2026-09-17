@@ -13,11 +13,12 @@ import org.junit.jupiter.api.Test;
 /** Tests assumptions required when constructing tasks. */
 public class TaskTest {
     private static final LocalDate SAMPLE_DATE = LocalDate.of(2026, 9, 16);
+    private static final LocalDate LATER_DATE = LocalDate.of(2026, 9, 17);
 
     @Test
     public void constructor_allTaskTypes_defaultToNone() {
         for (Task task : List.of(new ToDo("book"), new Deadline("book", SAMPLE_DATE),
-                new Event("meeting", SAMPLE_DATE, SAMPLE_DATE))) {
+                new Event("meeting", SAMPLE_DATE, LATER_DATE))) {
             assertEquals(Priority.NONE, task.getPriority());
         }
     }
@@ -42,10 +43,10 @@ public class TaskTest {
         assertEquals("T | 0 | NONE | read book", new ToDo("read book").toSaveMessage());
         assertEquals("D | 1 | EXTREME | report | 2026-09-16",
                 new Deadline("report", SAMPLE_DATE).setPriority(Priority.EXTREME).setCompleted(true).toSaveMessage());
-        assertEquals("E | 0 | LOW | meeting | 2026-09-16 | 2026-09-16",
-                new Event("meeting", SAMPLE_DATE, SAMPLE_DATE).setPriority(Priority.LOW).toSaveMessage());
-        assertEquals("[E][ ][P:LOW    ] meeting (from: 2026-09-16 to: 2026-09-16)",
-                new Event("meeting", SAMPLE_DATE, SAMPLE_DATE).setPriority(Priority.LOW).toString());
+        assertEquals("E | 0 | LOW | meeting | 2026-09-16 | 2026-09-17",
+                new Event("meeting", SAMPLE_DATE, LATER_DATE).setPriority(Priority.LOW).toSaveMessage());
+        assertEquals("[E][ ][P:LOW    ] meeting (from: 2026-09-16 to: 2026-09-17)",
+                new Event("meeting", SAMPLE_DATE, LATER_DATE).setPriority(Priority.LOW).toString());
     }
 
     @Test
@@ -66,5 +67,11 @@ public class TaskTest {
     @Test
     public void eventConstructor_nullEndDate_assertionErrorThrown() {
         assertThrows(AssertionError.class, () -> new Event("meeting", SAMPLE_DATE, null));
+    }
+
+    @Test
+    public void eventConstructor_nonIncreasingDates_assertionErrorThrown() {
+        assertThrows(AssertionError.class, () -> new Event("meeting", SAMPLE_DATE, SAMPLE_DATE));
+        assertThrows(AssertionError.class, () -> new Event("meeting", LATER_DATE, SAMPLE_DATE));
     }
 }

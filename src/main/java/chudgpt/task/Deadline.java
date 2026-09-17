@@ -20,6 +20,12 @@ public class Deadline extends Task {
     }
 
     @Override
+    public boolean hasSameDetails(Task other) {
+        return super.hasSameDetails(other)
+                && submitBy.equals(((Deadline) other).submitBy);
+    }
+
+    @Override
     public String toString() {
         return String.format("[D]%s (by: %s)", super.toString(), submitBy);
     }

@@ -21,8 +21,16 @@ public class Event extends Task {
         super(description);
         assert start != null : "Event start date should not be null";
         assert end != null : "Event end date should not be null";
+        assert start.isBefore(end) : "Event start date should be before its end date";
         this.start = start;
         this.end = end;
+    }
+
+    @Override
+    public boolean hasSameDetails(Task other) {
+        return super.hasSameDetails(other)
+                && start.equals(((Event) other).start)
+                && end.equals(((Event) other).end);
     }
 
     @Override

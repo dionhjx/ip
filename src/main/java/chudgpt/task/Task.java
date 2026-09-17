@@ -1,5 +1,6 @@
 package chudgpt.task;
 
+import java.util.Locale;
 import java.util.Objects;
 
 /** Common state and display behavior shared by all supported task types. */
@@ -46,6 +47,24 @@ public abstract class Task {
     public Task setPriority(Priority priority) {
         this.priority = Objects.requireNonNull(priority, "Task priority must not be null");
         return this;
+    }
+
+    /**
+     * Returns whether another task has the same type and user-entered details.
+     * Completion status and priority are intentionally ignored.
+     *
+     * @param other task to compare with this task.
+     * @return {@code true} if both tasks represent the same task details.
+     */
+    public boolean hasSameDetails(Task other) {
+        return other != null
+                && getClass().equals(other.getClass())
+                && normalizeDescription(description).equals(normalizeDescription(other.description));
+    }
+
+    /** Returns a normalized description suitable for duplicate comparisons. */
+    private static String normalizeDescription(String value) {
+        return value.trim().replaceAll("\\s+", " ").toLowerCase(Locale.ROOT);
     }
 
     @Override
