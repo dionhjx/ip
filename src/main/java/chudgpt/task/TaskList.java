@@ -1,6 +1,7 @@
 package chudgpt.task;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -96,6 +97,19 @@ public class TaskList {
         return updatedTask;
     }
 
+    /**
+     * Updates the priority of the selected task.
+     *
+     * @param index zero-based index of the task to update.
+     * @param priority priority to assign.
+     * @return the updated task.
+     * @throws ChudException if the index is out of range.
+     */
+    public Task updatePriority(int index, Priority priority) throws ChudException {
+        validateIndex(index, UPDATE_INDEX_OUT_OF_BOUNDS_MESSAGE);
+        return tasks.get(index).setPriority(priority);
+    }
+
     /** Ensures that an index identifies a task currently in the list. */
     private void validateIndex(int index, String errorMessage) throws ChudException {
         if (index < 0 || index >= tasks.size()) {
@@ -137,6 +151,20 @@ public class TaskList {
         return tasks.stream()
                 .map(Task::toSaveMessage)
                 .collect(Collectors.joining(System.lineSeparator()));
+    }
+
+    /**
+     * Renders a stable priority-sorted view using the current underlying task numbers.
+     * The backing list and its serialization order are not changed.
+     *
+     * @return tasks from highest to lowest priority, with ties in underlying order.
+     */
+    public String toPrioritySortedString() {
+        return IntStream.range(0, tasks.size())
+                .boxed()
+                .sorted(Comparator.comparing(index -> tasks.get(index).getPriority()))
+                .map(index -> (index + 1) + ". " + tasks.get(index))
+                .collect(Collectors.joining("\n"));
     }
 
     @Override

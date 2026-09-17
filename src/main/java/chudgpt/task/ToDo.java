@@ -23,6 +23,6 @@ public class ToDo extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("T | %d | %s", isCompleted ? 1 : 0, description);
+        return String.format("T | %d | %s | %s", isCompleted ? 1 : 0, getPriority(), description);
     }
 }

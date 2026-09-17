@@ -12,6 +12,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.api.io.TempDir;
 
 import chudgpt.command.AddTaskCommand;
+import chudgpt.command.ChangeTaskPriorityCommand;
 import chudgpt.command.ChangeTaskStatusCommand;
 import chudgpt.command.Command;
 import chudgpt.command.DeleteTaskCommand;
@@ -23,6 +24,7 @@ import chudgpt.exception.ChudException;
 import chudgpt.storage.Storage;
 import chudgpt.task.Deadline;
 import chudgpt.task.Event;
+import chudgpt.task.Priority;
 import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 import chudgpt.ui.Ui;
@@ -81,7 +83,7 @@ public class ParserTest {
         Task task = parseTaskCommand("deadline return book /by 2026-09-09");
 
         Deadline deadline = assertInstanceOf(Deadline.class, task);
-        assertEquals("[D][ ] return book (by: 2026-09-09)", deadline.toString());
+        assertEquals("[D][ ][P:NONE   ] return book (by: 2026-09-09)", deadline.toString());
     }
 
     @Test
@@ -105,7 +107,7 @@ public class ParserTest {
         Task task = parseTaskCommand("event project meeting /from 2026-09-09 /to 2026-09-10");
 
         Event event = assertInstanceOf(Event.class, task);
-        assertEquals("[E][ ] project meeting (from: 2026-09-09 to: 2026-09-10)",
+        assertEquals("[E][ ][P:NONE   ] project meeting (from: 2026-09-09 to: 2026-09-10)",
                 event.toString());
     }
 
@@ -162,6 +164,75 @@ public class ParserTest {
         assertChudException(expectedMessage, () -> Parser.parseDate("2024-02-30"));
         assertChudException(expectedMessage, () -> Parser.parseDate("29-02-2024"));
         assertChudException(expectedMessage, () -> Parser.parseDate(""));
+    }
+
+    @Test
+    public void parse_creationPriorities_supportsAllTaskTypesAndWhitespace() throws ChudException {
+        assertEquals(Priority.EXTREME, parseTaskCommand("  ToDo Read Book /PRIORITY   ExTrEmE  ").getPriority());
+        assertEquals("[D][ ][P:HIGH   ] return book (by: 2026-10-01)",
+                parseTaskCommand("deadline return book /by 2026-10-01 /priority high").toString());
+        assertEquals("[E][ ][P:LOW    ] meeting (from: 2026-10-01 to: 2026-10-02)",
+                parseTaskCommand("event meeting /from 2026-10-01 /to 2026-10-02 /priority low").toString());
+        assertEquals(Priority.NONE, parseTaskCommand("todo read book /priority none").getPriority());
+        assertEquals(Priority.MEDIUM, parseTaskCommand("todo read book\t/priority\tmedium").getPriority());
+    }
+
+    @Test
+    public void parse_priorityTokenBoundaries_preservesOrdinaryDescriptionText() throws ChudException {
+        assertEquals("[T][ ][P:NONE   ] document/priority high /priority-high",
+                parseTaskCommand("todo document/priority high /priority-high").toString());
+        assertEquals("[T][ ][P:NONE   ] mixed case", parseTaskCommand("todo Mixed CASE").toString());
+        assertEquals("[T][ ][P:NONE   ] ", parseTaskCommand("todo").toString());
+    }
+
+    @Test
+    public void parse_malformedPriorityClause_reportsSpecificSyntaxError() {
+        for (String command : new String[]{"todo read /priority",
+            "deadline book /by 2026-10-01 /priority",
+            "event meeting /from 2026-10-01 /to 2026-10-02 /priority"}) {
+            assertChudException("The /priority argument requires a priority value.", () -> parser.parse(command));
+        }
+        for (String command : new String[]{"todo read /priority high /priority low",
+            "todo read /priority high /priority"}) {
+            assertChudException("The /priority argument can only be specified once.", () -> parser.parse(command));
+        }
+        for (String command : new String[]{"todo read /priority high extra",
+            "deadline book /priority high /by 2026-10-01",
+            "event meeting /priority high /from 2026-10-01 /to 2026-10-02",
+            "todo discuss /priority handling in docs"}) {
+            assertChudException("The /priority argument must be the final argument.", () -> parser.parse(command));
+        }
+    }
+
+    @Test
+    public void parse_listCommand_rejectsUnsupportedArguments() throws ChudException {
+        assertInstanceOf(ListCommand.class, parser.parse("list"));
+        assertInstanceOf(ListCommand.class, parser.parse("LIST /SORT PRIORITY"));
+        for (String command : new String[]{"list priority", "list /sort", "list /sort date",
+            "list /sort priority extra"}) {
+            assertChudException("Usage: list or list /sort priority.", () -> parser.parse(command));
+        }
+    }
+
+    @Test
+    public void parse_unsupportedPriority_reportsAllowedValues() {
+        String expected = "Priority must be one of: EXTREME, HIGH, MEDIUM, LOW, NONE.";
+        for (String command : new String[]{"todo read /priority 1", "priority 1 urgent",
+            "deadline book /by 2026-10-01 /priority h",
+            "event meeting /from 2026-10-01 /to 2026-10-02 /priority med"}) {
+            assertChudException(expected, () -> parser.parse(command));
+        }
+    }
+
+    @Test
+    public void parse_priorityCommand_validatesShapeBeforeValues() throws ChudException {
+        assertInstanceOf(ChangeTaskPriorityCommand.class, parser.parse(" PRIORITY  2  HiGh "));
+        for (String command : new String[]{"priority", "priority 1", "priority high", "priority 1 high extra"}) {
+            assertChudException("Usage: priority <task number> <priority>.", () -> parser.parse(command));
+        }
+        for (String value : new String[]{"one", "1.5", "2147483648"}) {
+            assertChudException("Task number must be a number.", () -> parser.parse("priority " + value + " high"));
+        }
     }
 
     /**

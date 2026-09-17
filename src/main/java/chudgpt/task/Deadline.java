@@ -31,6 +31,6 @@ public class Deadline extends Task {
      */
     @Override
     public String toSaveMessage() {
-        return String.format("D | %d | %s | %s", isCompleted ? 1 : 0, description, submitBy);
+        return String.format("D | %d | %s | %s | %s", isCompleted ? 1 : 0, getPriority(), description, submitBy);
     }
 }

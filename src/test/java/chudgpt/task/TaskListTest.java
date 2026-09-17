@@ -198,9 +198,9 @@ public class TaskListTest {
         TaskList taskList = taskListOf(new ToDo("unfinished"),
                 new ToDo("finished").setCompleted(true));
 
-        String expected = "T | 0 | unfinished"
+        String expected = "T | 0 | NONE | unfinished"
                 + System.lineSeparator()
-                + "T | 1 | finished";
+                + "T | 1 | NONE | finished";
 
         assertEquals(expected, taskList.toFileFormat());
     }
@@ -215,9 +215,65 @@ public class TaskListTest {
         TaskList taskList = taskListOf(new ToDo("first"),
                 new ToDo("second").setCompleted(true));
 
-        String expected = "1. [T][ ] first\n2. [T][X] second";
+        String expected = "1. [T][ ][P:NONE   ] first\n2. [T][X][P:NONE   ] second";
 
         assertEquals(expected, taskList.toString());
+    }
+
+    @Test
+    public void updatePriority_validAndInvalidIndices_updatesOnlySelectedTask() throws ChudException {
+        Task first = new ToDo("first");
+        Task second = new ToDo("second").setCompleted(true);
+        TaskList tasks = taskListOf(first, second);
+
+        assertSame(second, tasks.updatePriority(1, Priority.EXTREME));
+        assertEquals(Priority.NONE, first.getPriority());
+        assertEquals(Priority.EXTREME, second.getPriority());
+        assertTrue(second.isCompleted());
+        String saved = tasks.toFileFormat();
+        for (int index : new int[]{-1, 2, Integer.MAX_VALUE}) {
+            ChudException exception = assertThrows(ChudException.class, () ->
+                    tasks.updatePriority(index, Priority.LOW));
+            assertEquals("Index out of bounds.", exception.getMessage());
+        }
+        assertEquals(saved, tasks.toFileFormat());
+        assertThrows(ChudException.class, () -> new TaskList().updatePriority(0, Priority.HIGH));
+    }
+
+    @Test
+    public void toPrioritySortedString_mixedPriorities_preservesNumbersTiesAndBackingOrder() {
+        TaskList tasks = taskListOf(new ToDo("medium").setPriority(Priority.MEDIUM),
+                new ToDo("extreme first").setPriority(Priority.EXTREME).setCompleted(true),
+                new ToDo("high").setPriority(Priority.HIGH),
+                new ToDo("extreme second").setPriority(Priority.EXTREME),
+                new ToDo("none"), new ToDo("low").setPriority(Priority.LOW));
+        String original = tasks.toString();
+        String saved = tasks.toFileFormat();
+
+        assertEquals("2. [T][X][P:EXTREME] extreme first\n"
+                + "4. [T][ ][P:EXTREME] extreme second\n"
+                + "3. [T][ ][P:HIGH   ] high\n"
+                + "1. [T][ ][P:MEDIUM ] medium\n"
+                + "6. [T][ ][P:LOW    ] low\n"
+                + "5. [T][ ][P:NONE   ] none", tasks.toPrioritySortedString());
+        assertEquals(original, tasks.toString());
+        assertEquals(saved, tasks.toFileFormat());
+    }
+
+    @Test
+    public void toPrioritySortedString_emptySingleAndEqualPriorities_preservesNormalDisplay() {
+        assertEquals("", new TaskList().toPrioritySortedString());
+        TaskList single = taskListOf(new ToDo("one").setPriority(Priority.HIGH));
+        assertEquals(single.toString(), single.toPrioritySortedString());
+        TaskList equal = taskListOf(new ToDo("one"), new ToDo("two"));
+        assertEquals(equal.toString(), equal.toPrioritySortedString());
+    }
+
+    @Test
+    public void findTasks_prioritizedTasks_searchesOnlyDescriptions() {
+        TaskList tasks = taskListOf(new ToDo("report").setPriority(Priority.HIGH), new ToDo("high tide"));
+        assertEquals("1. [T][ ][P:NONE   ] high tide", tasks.findTasks("high").toString());
+        assertEquals("1. [T][ ][P:HIGH   ] report", tasks.findTasks("REPORT").toString());
     }
 
     /**

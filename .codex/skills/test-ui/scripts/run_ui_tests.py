@@ -87,11 +87,13 @@ def check_java_25() -> None:
 
 def compile_application(classes: Path) -> None:
     """Compile the application and copy classpath resources into a temporary tree."""
-    sources = sorted(SOURCE_ROOT.rglob("*.java"))
-    if not sources:
-        raise RuntimeError(f"No Java sources found in {SOURCE_ROOT}")
+    # The root package also contains JavaFX controllers; compile only the console app and its packages.
+    sources = [SOURCE_ROOT / "chudgpt" / "ChudGpt.java"]
+    for package in ("command", "exception", "parser", "storage", "task", "ui"):
+        sources.extend(sorted((SOURCE_ROOT / "chudgpt" / package).rglob("*.java")))
     subprocess.run(
-        ["javac", "-d", str(classes), *(str(source) for source in sources)],
+        ["javac", "--release", "25", "-encoding", "UTF-8", "-d", str(classes),
+         *(str(source) for source in sources)],
         cwd=REPOSITORY_ROOT,
         check=True,
     )
@@ -103,20 +105,22 @@ def compile_application(classes: Path) -> None:
                 shutil.copy2(resource, destination)
 
 
-def run_case(case: TestCase, classes: Path, working_directory: Path) -> tuple[str, str]:
+def run_case(case: TestCase, classes: Path, working_directory: Path) -> tuple[str, str, int]:
     """Run one isolated test case and return normalized actual stdout and input."""
     input_text = case.inputs
     result = subprocess.run(
-        ["java", "-cp", str(classes), MAIN_CLASS],
+        ["java", "-ea", "-cp", str(classes), MAIN_CLASS],
         cwd=working_directory,
         input=input_text,
         capture_output=True,
         text=True,
+        encoding="utf-8",
+        timeout=30,
         check=False,
     )
     if result.stderr:
         print(f"[stderr from {case.name}]\n{result.stderr}", file=sys.stderr)
-    return input_text, normalize(result.stdout)
+    return input_text, normalize(result.stdout), result.returncode
 
 
 def print_transcript(case: TestCase, input_text: str, actual: str) -> None:
@@ -141,15 +145,15 @@ def main() -> int:
                 if case.initial_save is not None:
                     data_directory = working_directory / "data"
                     data_directory.mkdir()
-                    (data_directory / "save.txt").write_text(
+                    (data_directory / "tasks.txt").write_text(
                         case.initial_save,
                         encoding="utf-8",
                     )
-                input_text, actual = run_case(case, classes, working_directory)
+                input_text, actual, exit_code = run_case(case, classes, working_directory)
                 print(f"\n=== Test Case {number}: {case.name} ===")
                 print(f"Aim: {case.aim}")
                 print_transcript(case, input_text, actual)
-                if actual != case.expected:
+                if exit_code != 0 or actual != case.expected:
                     print("RESULT: FAILED")
                     print("EXPECTED OUTPUT:")
                     print(case.expected, end="" if case.expected.endswith("\n") else "\n")
@@ -160,7 +164,7 @@ def main() -> int:
                 print("RESULT: PASSED")
         print(f"\nAll {len(cases)} UI test cases passed.")
         return 0
-    except (OSError, ValueError, RuntimeError, subprocess.CalledProcessError) as error:
+    except (OSError, ValueError, RuntimeError, subprocess.SubprocessError) as error:
         print(f"UI test runner error: {error}", file=sys.stderr)
         return 2
 

@@ -11,6 +11,7 @@ import chudgpt.exception.ChudException;
 import chudgpt.parser.Parser;
 import chudgpt.task.Deadline;
 import chudgpt.task.Event;
+import chudgpt.task.Priority;
 import chudgpt.task.Task;
 import chudgpt.task.TaskList;
 import chudgpt.task.ToDo;
@@ -88,6 +89,31 @@ public class Storage {
             return null;
         }
 
+        int legacyFieldCount = switch (parts[0]) {
+            case "T" -> 3;
+            case "D" -> 4;
+            case "E" -> 5;
+            default -> 0;
+        };
+        if (legacyFieldCount == 0) {
+            return null;
+        }
+
+        Priority priority = Priority.NONE;
+        if (parts.length == legacyFieldCount + 1) {
+            try {
+                priority = Priority.valueOf(parts[2]);
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+
+            // Remove the priority field so the existing legacy validators can be reused.
+            String[] legacyParts = new String[legacyFieldCount];
+            System.arraycopy(parts, 0, legacyParts, 0, 2);
+            System.arraycopy(parts, 3, legacyParts, 2, legacyFieldCount - 2);
+            parts = legacyParts;
+        }
+
         Task task = createTask(parts);
         if (task == null) {
             return null;
@@ -95,6 +121,7 @@ public class Storage {
         assert task != null : "A recognized saved record should produce a task";
 
         task.setCompleted(isCompleted);
+        task.setPriority(priority);
         return task;
     }
 
