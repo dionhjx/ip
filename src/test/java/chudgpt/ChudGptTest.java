@@ -1,6 +1,7 @@
 package chudgpt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.nio.file.Files;
@@ -34,6 +35,21 @@ public class ChudGptTest {
     }
 
     @Test
+    public void getResponseDetails_normalErrorAndTaskAddedCommands_returnsPresentationType() {
+        ChudGpt chudGpt = createChudGpt();
+
+        ChudGpt.Response validResponse = chudGpt.getResponseDetails("hi");
+        ChudGpt.Response errorResponse = chudGpt.getResponseDetails("unknown");
+        ChudGpt.Response taskAddedResponse = chudGpt.getResponseDetails("todo read book");
+
+        assertEquals("Hi! I'm ChudGPT. How can I help you?", validResponse.text());
+        assertEquals(ChudGpt.ResponseType.NORMAL, validResponse.responseType());
+        assertEquals(ChudGpt.ResponseType.ERROR, errorResponse.responseType());
+        assertTrue(errorResponse.text().endsWith("Invalid command."));
+        assertEquals(ChudGpt.ResponseType.TASK_ADDED, taskAddedResponse.responseType());
+    }
+
+    @Test
     public void getResponse_addThenList_returnsUpdatedTaskList() {
         ChudGpt chudGpt = createChudGpt();
 
@@ -49,6 +65,14 @@ public class ChudGptTest {
 
         assertTrue(welcomeMessage.contains("Hello! I'm ChudGPT."));
         assertTrue(welcomeMessage.contains("What can I do for you?"));
+    }
+
+    @Test
+    public void getGuiWelcomeMessage_newApplication_omitsConsoleDecoration() {
+        String welcomeMessage = createChudGpt().getGuiWelcomeMessage();
+
+        assertEquals("Hello! I'm ChudGPT.\nWhat can I do for you?", welcomeMessage);
+        assertFalse(welcomeMessage.contains("____"));
     }
 
     @Test
