@@ -135,6 +135,27 @@ public class ChudGptTest {
     }
 
     @Test
+    public void getGuiWelcomeMessage_savePathIsDirectory_reportsLoadError() throws Exception {
+        Path saveTarget = temporaryDirectory.resolve("tasks");
+        Files.createDirectory(saveTarget);
+
+        String welcomeMessage = new ChudGpt(saveTarget.toString()).getGuiWelcomeMessage();
+
+        assertTrue(welcomeMessage.contains("I couldn't retrieve the save file"));
+        assertTrue(welcomeMessage.contains("The task data path is not a regular file"));
+    }
+
+    @Test
+    public void getResponse_afterExit_exitStatusRemainsTrue() {
+        ChudGpt chudGpt = createChudGpt();
+
+        chudGpt.getResponse("bye");
+        chudGpt.getResponse("unknown");
+
+        assertTrue(chudGpt.hasExited());
+    }
+
+    @Test
     public void getResponse_sortedViewThenCommands_targetCurrentUnderlyingNumbers() {
         ChudGpt chudGpt = createChudGpt();
         chudGpt.getResponse("todo first");

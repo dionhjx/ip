@@ -1,12 +1,14 @@
 package chudgpt.storage;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -167,5 +169,56 @@ public class StorageTest {
         storage.save(new TaskList(List.of(new ToDo("task"))));
 
         assertEquals("T | 0 | NONE | task", Files.readString(saveFile));
+    }
+
+    @Test
+    public void constructor_nullOrBlankPath_assertionErrorThrown() {
+        assertThrows(AssertionError.class, () -> new Storage(null));
+        assertThrows(AssertionError.class, () -> new Storage(""));
+        assertThrows(AssertionError.class, () -> new Storage("   "));
+    }
+
+    @Test
+    public void load_missingFile_returnsImmutableEmptyResult() throws Exception {
+        Storage.LoadResult result = new Storage(temporaryDirectory.resolve("missing.txt").toString())
+                .loadWithWarnings();
+
+        assertTrue(result.tasks().isEmpty());
+        assertTrue(result.warnings().isEmpty());
+        assertThrows(UnsupportedOperationException.class, () -> result.tasks().add(new ToDo("task")));
+        assertThrows(UnsupportedOperationException.class, () -> result.warnings().add("warning"));
+    }
+
+    @Test
+    public void loadResult_mutableInputs_copiesInputsDefensively() {
+        List<Task> tasks = new ArrayList<>(List.of(new ToDo("task")));
+        List<String> warnings = new ArrayList<>(List.of("warning"));
+
+        Storage.LoadResult result = new Storage.LoadResult(tasks, warnings);
+        tasks.clear();
+        warnings.clear();
+
+        assertEquals(1, result.tasks().size());
+        assertEquals(List.of("warning"), result.warnings());
+    }
+
+    @Test
+    public void load_pathIsDirectory_exceptionThrown() throws Exception {
+        Path directory = temporaryDirectory.resolve("tasks");
+        Files.createDirectory(directory);
+
+        ChudException exception = assertThrows(ChudException.class, () ->
+                new Storage(directory.toString()).load());
+
+        assertTrue(exception.getMessage().startsWith("The task data path is not a regular file: "));
+    }
+
+    @Test
+    public void save_nullTaskList_assertionErrorThrownWithoutCreatingFile() {
+        Path saveFile = temporaryDirectory.resolve("tasks.txt");
+        Storage storage = new Storage(saveFile.toString());
+
+        assertThrows(AssertionError.class, () -> storage.save(null));
+        assertFalse(Files.exists(saveFile));
     }
 }
