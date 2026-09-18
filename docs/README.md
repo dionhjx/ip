@@ -1,25 +1,85 @@
 # ChudGPT User Guide
 
 ChudGPT manages ToDos, deadlines, and events with completion status and optional priorities.
-Use Java 25. Run `chudgpt.ChudGpt.main()` in `src/main/java/chudgpt/ChudGpt.java` for the console,
-or `chudgpt.Launcher.main()` (also available through Gradle's `run` task) for the JavaFX interface.
+
+## Quick start
+
+Install Java 25 and run commands from the repository root. Running from the repository root also ensures that the
+task data is stored in this repository's `data/tasks.txt` file.
+
+Start the JavaFX interface on Windows:
+
+```powershell
+.\gradlew.bat run
+```
+
+On macOS or Linux, use:
+
+```bash
+./gradlew run
+```
+
+To use the console interface instead, compile the classes first and then start `chudgpt.ChudGpt`:
+
+```powershell
+# Windows PowerShell
+.\gradlew.bat classes
+java -cp "build\classes\java\main;build\resources\main" chudgpt.ChudGpt
+```
+
+```bash
+# macOS or Linux
+./gradlew classes
+java -cp "build/classes/java/main:build/resources/main" chudgpt.ChudGpt
+```
+
+To build a self-contained GUI JAR, run `./gradlew shadowJar` (`.\gradlew.bat shadowJar` on Windows), then launch
+`build/libs/chudGPT.jar` with `java -jar build/libs/chudGPT.jar`.
+
+All relative paths are resolved from the directory in which ChudGPT is started. If it is started elsewhere, it
+will use a different `<working directory>/data/tasks.txt` file.
+
+## Interfaces and task notation
+
 Both interfaces accept the same commands. The responsive GUI uses compact, right-aligned command bubbles and wider
 left-aligned response cards so long replies have more room. Error responses use a high-contrast red card, while task
 creation confirmations use a green success card. Large circular profile pictures clearly identify each participant.
 Priority labels are color coded in GUI responses: purple for EXTREME, red for HIGH, amber for
 MEDIUM, green for LOW, and muted gray for NONE. The GUI welcome card omits the console's text-art logo and divider
-lines. The window can be resized down to its minimum dimensions, and `bye` disables its input controls.
+lines. Press Enter or click **Send** to submit a GUI command; the input is then cleared and focused for the next
+command. The window can be resized down to its minimum dimensions.
+
+Tasks use the following compact notation:
+
+| Token | Meaning |
+| --- | --- |
+| `[T]` | ToDo |
+| `[D]` | Deadline |
+| `[E]` | Event |
+| `[X]` | Completed |
+| `[ ]` | Incomplete |
+| `[P:HIGH   ]` | Priority; the name is padded to seven characters |
+
+In the console, `bye` saves and ends the process. In the GUI, it saves and disables the input field and **Send**
+button, but leaves the window open for you to close manually. If saving fails, neither interface exits or disables
+its controls.
 
 The app loads `data/tasks.txt` relative to its working directory. A missing file means an empty task list.
 The folder and file are created when saving. There is no fixed 100-task limit.
 
 ## Commands and input
 
-Commands and priority keywords are case-insensitive. Surrounding command whitespace is ignored.
-The existing parser also lowercases task descriptions. Dates use `yyyy-mm-dd`, such as `2026-10-01`;
+Commands and priority keywords are case-insensitive. Surrounding command whitespace is ignored. ChudGPT lowercases
+the entire command before parsing it, so capitalization in a newly entered description is not preserved: `Buy Milk`
+is stored and displayed as `buy milk`. Internal description whitespace is preserved for display, although repeated
+whitespace is ignored when checking for duplicates. Dates use `yyyy-mm-dd`, such as `2026-10-01`;
 natural-language dates and times such as `Sunday` and `Mon 2pm` are not accepted.
 Descriptions must contain 1-200 characters and cannot contain `|`, line breaks, or control characters because
 those values would corrupt the save-file format.
+
+Enter `/by`, `/from`, and `/to` exactly where shown in the command table. The parser treats those strings as
+delimiters even when they occur inside a longer word, so avoid using those slash-prefixed strings in descriptions.
+`/priority` is different: it is treated as an option only when it appears as a standalone token.
 
 | Command | Purpose |
 | --- | --- |
@@ -37,8 +97,12 @@ those values would corrupt the save-file format.
 | `bye` | Save and exit. |
 
 Square brackets in syntax tables indicate optional arguments; do not type those brackets.
-Task numbers start at 1 and can change after deleting a task. Use the current full list to select a task.
-Existing `find` results are numbered within the matches, so use `list` to obtain task numbers before editing.
+There is no in-app `help` command; use the table above as the command reference.
+
+Task numbers start at 1 and are positions rather than permanent IDs, so they can change after deletion. Plain `list`
+and `list /sort priority` both show the real current task numbers. `find` instead numbers its matches from 1 for
+display only; those result numbers are not safe to use with `mark`, `unmark`, `priority`, or `delete`. Run `list` to
+obtain the task's current number before editing it.
 
 ## Priorities
 
@@ -116,6 +180,8 @@ You have no tasks in your list! Try adding some
 ```
 
 `find` continues searching descriptions only, not priority metadata. Its task results include priority labels.
+A search with no matches returns `I couldn't find any tasks that contains that keyword.` Searching does not change
+or save the task list.
 
 ## Validation
 
