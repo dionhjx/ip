@@ -1,6 +1,7 @@
 package chudgpt.task;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +37,34 @@ public class TaskTest {
         assertEquals("[D][X][P:NONE   ] return book (by: 2026-09-16)", task.toString());
         assertThrows(NullPointerException.class, () -> task.setPriority(null));
         assertEquals(Priority.NONE, task.getPriority());
+    }
+
+    @Test
+    public void setCompleted_toggleStatus_returnsSameTask() {
+        Task task = new ToDo("task");
+
+        assertSame(task, task.setCompleted(true));
+        assertTrue(task.isCompleted());
+        assertSame(task, task.setCompleted(false));
+        assertFalse(task.isCompleted());
+    }
+
+    @Test
+    public void hasSameDetails_variedTasks_comparesOnlyNormalizedTypeDescriptionAndDates() {
+        Task task = new ToDo(" Read   Book ").setCompleted(true).setPriority(Priority.HIGH);
+
+        assertTrue(task.hasSameDetails(new ToDo("read book")));
+        assertFalse(task.hasSameDetails(null));
+        assertFalse(task.hasSameDetails(new ToDo("different")));
+        assertFalse(task.hasSameDetails(new Deadline("read book", SAMPLE_DATE)));
+        assertTrue(new Deadline("task", SAMPLE_DATE).hasSameDetails(new Deadline("TASK", SAMPLE_DATE)));
+        assertFalse(new Deadline("task", SAMPLE_DATE).hasSameDetails(new Deadline("task", LATER_DATE)));
+        assertTrue(new Event("task", SAMPLE_DATE, LATER_DATE)
+                .hasSameDetails(new Event("TASK", SAMPLE_DATE, LATER_DATE)));
+        assertFalse(new Event("task", SAMPLE_DATE, LATER_DATE)
+                .hasSameDetails(new Event("task", SAMPLE_DATE.minusDays(1), LATER_DATE)));
+        assertFalse(new Event("task", SAMPLE_DATE, LATER_DATE)
+                .hasSameDetails(new Event("task", SAMPLE_DATE, LATER_DATE.plusDays(1))));
     }
 
     @Test

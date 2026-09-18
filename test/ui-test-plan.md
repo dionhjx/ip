@@ -30,6 +30,11 @@ Run `./gradlew test checkstyleMain checkstyleTest` with Java 25 (`.\gradlew.bat`
 | Line-level recovery, duplicate records, backups, invalid dates, save failures | `StorageTest` |
 | Priority update/repeat/clear, persistence and rejected commands without file changes | `ChangeTaskPriorityCommandTest` |
 | Sorted view uses no storage and preserves normal-list numbering | `ListCommandTest` |
+| Add, delete, status, find, greeting, save, and exit command behavior and persistence | `CommandTest` |
+| All console message variants, logo loading, input reading, and output display | `UiTest` |
+| Missing and invalid storage paths, immutable load results, and invalid constructor inputs | `StorageTest` |
+| Task completion toggles and duplicate-detail comparison branches | `TaskTest`, `TaskListTest` |
+| Domain exception messages and chained causes | `ChudExceptionTest` |
 | Sorted output followed by mark/priority/delete, restart, errors, invalid list arguments | `ChudGptTest` |
 
 ## Test Case 1: Greet and exit

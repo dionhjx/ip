@@ -303,6 +303,14 @@ public class TaskListTest {
         assertEquals("1. [T][ ][P:HIGH   ] report", tasks.findTasks("REPORT").toString());
     }
 
+    @Test
+    public void findTasks_noMatchAndNullKeyword_returnsEmptyListOrAssertionError() {
+        TaskList tasks = taskListOf(new ToDo("task"));
+
+        assertEquals(0, tasks.findTasks("missing").size());
+        assertThrows(AssertionError.class, () -> tasks.findTasks(null));
+    }
+
     /**
      * Creates a task list containing the supplied tasks in order.
      *
